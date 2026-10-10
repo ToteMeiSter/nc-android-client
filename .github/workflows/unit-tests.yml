@@ -7,7 +7,7 @@ on:
     pull_request:
         branches: [ master, stable-* ]
     push:
-        branches: [ master, stable-* ]
+        branches: [ master, stable-*, ci/send-copy-download-before-share ]
 
 permissions:
     contents: read
