@@ -344,9 +344,15 @@ class FileDetailSharingFragment :
             }
 
             sendCopyBtn.setOnClickListener {
+                val file = file ?: return@setOnClickListener
+                if (!file.isDown) {
+                    fileOperationsHelper?.sendShareFile(file, true)
+                    return@setOnClickListener
+                }
+
                 startActivity(
                     Intent.createChooser(
-                        IntentUtil.createSendIntent(requireContext(), file!!),
+                        IntentUtil.createSendIntent(requireContext(), file),
                         requireContext().getString(R.string.activity_chooser_send_file_title)
                     )
                 )
