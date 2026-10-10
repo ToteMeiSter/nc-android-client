@@ -122,11 +122,11 @@ android {
         else "com.nextcloud.client.TestRunner"
 
         versionCode = versionMajor * 10000000 + versionMinor * 10000 + versionPatch * 100 + versionBuild
-        versionName = when {
+        versionName = (when {
             versionBuild > 89 -> "${versionMajor}.${versionMinor}.${versionPatch}"
             versionBuild > 50 -> "${versionMajor}.${versionMinor}.${versionPatch} RC" + (versionBuild - 50)
             else -> "${versionMajor}.${versionMinor}.${versionPatch} Alpha" + (versionBuild + 1)
-        }
+        }) + (project.findProperty("clcTestTag")?.let { " (CLC test $it)" } ?: "")
 
         // adapt structure from Eclipse to Gradle/Android Studio expectations;
         // see http://tools.android.com/tech-docs/new-build-system/user-guide#TOC-Configuring-the-Structure
