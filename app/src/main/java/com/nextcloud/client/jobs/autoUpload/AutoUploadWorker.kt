@@ -97,6 +97,9 @@ class AutoUploadWorker(
     @Suppress("ReturnCount")
     override suspend fun doWork(): Result {
         return try {
+            // WorkManager can post the notification of a run that has already ended and never remove it
+            notificationManager.dismissNotification(notificationManager.getId())
+
             syncedFolder = syncedFolderProvider.getSyncedFolderByID(syncedFolderId)
                 ?.takeIf { it.isEnabled } ?: return Result.failure()
 
@@ -118,8 +121,10 @@ class AutoUploadWorker(
                 return Result.success()
             }
 
-            // WorkManager can post the notification of a run that has already ended and never remove it
-            trySetForeground()
+            // a run without files ends within milliseconds, the same WorkManager race would leave its notification
+            if (repository.hasPendingFiles(syncedFolder)) {
+                trySetForeground()
+            }
             uploadFiles(syncedFolder)
 
             // only update last scan time after uploading files

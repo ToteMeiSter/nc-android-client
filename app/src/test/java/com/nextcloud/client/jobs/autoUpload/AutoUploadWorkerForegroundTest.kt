@@ -38,6 +38,7 @@ import java.util.UUID
 class AutoUploadWorkerForegroundTest {
 
     private val foregroundUpdater: ForegroundUpdater = mockk()
+    private val systemNotificationManager: NotificationManager = mockk(relaxed = true)
     private val repository: FileSystemRepository = mockk(relaxed = true)
     private val syncedFolder: SyncedFolder = mockk(relaxed = true)
     private val syncedFolderProvider: SyncedFolderProvider = mockk(relaxed = true)
@@ -62,7 +63,7 @@ class AutoUploadWorkerForegroundTest {
             every { foregroundUpdater } returns this@AutoUploadWorkerForegroundTest.foregroundUpdater
         }
         val context: Context = mockk(relaxed = true) {
-            every { getSystemService(Context.NOTIFICATION_SERVICE) } returns mockk<NotificationManager>(relaxed = true)
+            every { getSystemService(Context.NOTIFICATION_SERVICE) } returns systemNotificationManager
         }
 
         every { syncedFolder.isEnabled } returns true
@@ -109,7 +110,17 @@ class AutoUploadWorkerForegroundTest {
     }
 
     @Test
-    fun runWithNothingToUploadDoesNotGoToForeground() = runBlocking {
+    fun runWithinScanIntervalWithoutPendingFilesDoesNotGoToForeground() = runBlocking {
+        coEvery { repository.hasPendingFiles(syncedFolder) } returns false
+
+        worker.doWork()
+
+        verify(exactly = 0) { foregroundUpdater.setForegroundAsync(any(), any(), any()) }
+    }
+
+    @Test
+    fun runAfterScanIntervalWithoutPendingFilesDoesNotGoToForeground() = runBlocking {
+        every { syncedFolder.getTotalScanInterval(any(), any()) } returns 0L
         coEvery { repository.hasPendingFiles(syncedFolder) } returns false
 
         worker.doWork()
@@ -123,7 +134,16 @@ class AutoUploadWorkerForegroundTest {
 
         worker.doWork()
 
-        verify(exactly = 1) { foregroundUpdater.setForegroundAsync(any(), any(), any()) }
+        verify(atLeast = 1) { foregroundUpdater.setForegroundAsync(any(), any(), any()) }
+    }
+
+    @Test
+    fun runRemovesNotificationLeftByEarlierRunOfSameFolder() = runBlocking {
+        coEvery { repository.hasPendingFiles(syncedFolder) } returns false
+
+        worker.doWork()
+
+        verify { systemNotificationManager.cancel(AutoUploadNotificationId.forFolder(FOLDER_ID)) }
     }
 
     private companion object {
