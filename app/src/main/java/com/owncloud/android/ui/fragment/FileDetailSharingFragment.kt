@@ -67,6 +67,7 @@ import com.owncloud.android.ui.activity.FileActivity
 import com.owncloud.android.ui.adapter.ShareeListAdapter
 import com.owncloud.android.ui.adapter.ShareeListAdapterListener
 import com.owncloud.android.ui.asynctasks.RetrieveHoverCardAsyncTask
+import com.owncloud.android.ui.dialog.SendShareDialog
 import com.owncloud.android.ui.dialog.SharePasswordDialogFragment
 import com.owncloud.android.ui.dialog.SharePasswordDialogFragment.Companion.newInstance
 import com.owncloud.android.ui.fragment.QuickSharingPermissionsBottomSheetDialog.QuickPermissionSharingBottomSheetActions
@@ -345,7 +346,7 @@ class FileDetailSharingFragment :
 
             sendCopyBtn.setOnClickListener {
                 val file = file ?: return@setOnClickListener
-                if (!file.isDown) {
+                if (!file.isDown && activity is SendShareDialog.SendShareDialogDownloader) {
                     fileOperationsHelper?.sendShareFile(file, true)
                     return@setOnClickListener
                 }
