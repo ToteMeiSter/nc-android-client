@@ -77,13 +77,16 @@ class AutoUploadWorker(
         const val TAG = "🔄📤" + "AutoUpload"
         const val OVERRIDE_POWER_SAVING = "overridePowerSaving"
         const val SYNCED_FOLDER_ID = "syncedFolderId"
-        const val NOTIFICATION_ID = 266
     }
 
     private val syncFolderHelper = SyncFolderHelper(context)
     private val fileUploadEventBroadcaster = FileUploadEventBroadcaster(localBroadcastManager)
     private lateinit var syncedFolder: SyncedFolder
-    private val notificationManager = AutoUploadNotificationManager(context, viewThemeUtils, NOTIFICATION_ID)
+    private val notificationManager = AutoUploadNotificationManager(
+        context,
+        viewThemeUtils,
+        AutoUploadNotificationId.forFolder(params.inputData.getLong(SYNCED_FOLDER_ID, -1))
+    )
     private val fileUploadHelper = FileUploadHelper.instance()
     private val retryPolicy = UploadDelayPolicy()
 
