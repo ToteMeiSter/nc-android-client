@@ -812,11 +812,6 @@ public class FileOperationsHelper {
             Intent intent = new Intent(Intent.ACTION_ATTACH_DATA);
             Uri uri;
 
-            if (!file.isDown()) {
-                SnackbarUtil.show(view, R.string.set_picture_as_download_required);
-                return;
-            }
-
             try {
                 File externalFile = new File(file.getStoragePath());
 
