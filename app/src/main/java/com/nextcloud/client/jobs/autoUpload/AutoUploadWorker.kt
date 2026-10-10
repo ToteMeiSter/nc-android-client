@@ -97,8 +97,6 @@ class AutoUploadWorker(
     @Suppress("ReturnCount")
     override suspend fun doWork(): Result {
         return try {
-            trySetForeground()
-
             syncedFolder = syncedFolderProvider.getSyncedFolderByID(syncedFolderId)
                 ?.takeIf { it.isEnabled } ?: return Result.failure()
 
@@ -120,6 +118,8 @@ class AutoUploadWorker(
                 return Result.success()
             }
 
+            // WorkManager can post the notification of a run that has already ended and never remove it
+            trySetForeground()
             uploadFiles(syncedFolder)
 
             // only update last scan time after uploading files
