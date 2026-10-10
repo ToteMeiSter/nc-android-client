@@ -7,7 +7,7 @@ on:
     pull_request:
         branches: [ master, stable-* ]
     push:
-        branches: [ master, ci/auto-upload-resume-after-pause ]
+        branches: [ master, ci/auto-upload-resume-after-pause-nofix ]
 
 # Declare default permissions as read only.
 permissions: read-all

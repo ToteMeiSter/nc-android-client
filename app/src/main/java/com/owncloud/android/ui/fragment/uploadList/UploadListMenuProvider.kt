@@ -20,7 +20,6 @@ import com.nextcloud.client.preferences.AppPreferences
 import com.owncloud.android.R
 import com.owncloud.android.datamodel.SyncedFolderProvider
 import com.owncloud.android.datamodel.UploadsStorageManager
-import com.owncloud.android.utils.FilesSyncHelper
 
 class UploadListMenuProvider(
     private val context: Context,
@@ -67,12 +66,6 @@ class UploadListMenuProvider(
         if (paused) {
             FileUploadWorker.pauseActiveUploads()
             AlbumFileUploadWorker.pauseActiveUploads()
-        } else {
-            FilesSyncHelper.startAutoUploadForEnabledSyncedFolders(
-                syncedFolderProvider,
-                backgroundJobManager,
-                overridePowerSaving = false
-            )
         }
 
         val helper = uploadHelper()

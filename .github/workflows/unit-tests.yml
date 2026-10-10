@@ -7,7 +7,7 @@ on:
     pull_request:
         branches: [ master, stable-* ]
     push:
-        branches: [ master, stable-*, ci/auto-upload-resume-after-pause ]
+        branches: [ master, stable-*, ci/auto-upload-resume-after-pause-nofix ]
 
 permissions:
     contents: read
