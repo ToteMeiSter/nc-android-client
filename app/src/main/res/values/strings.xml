@@ -1608,7 +1608,6 @@
     <string name="webview_not_available">Android System WebView is missing or disabled on this device</string>
     <string name="send_copy_to">Send copy to</string>
     <string name="send_share_download_unavailable">The file isn\'t on your device yet. Download it first, then send it</string>
-    <string name="set_picture_as_download_required">Download the picture first, then try again</string>
     <string name="failed_to_start_action">Failed to start action!</string>
     <string name="failed_to_load_tags">Failed to load tags</string>
     <string name="action_triggered">Action triggered</string>
