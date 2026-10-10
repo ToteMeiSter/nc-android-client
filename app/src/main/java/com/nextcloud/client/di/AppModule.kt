@@ -266,8 +266,8 @@ internal class AppModule {
     companion object {
         private const val LOG_DIR_NAME = "logs"
         private const val LOG_FILE_NAME = "log.txt"
-        private const val LOG_FILE_MAX_SIZE_BYTES = 1024L * 1024L
-        private const val LOGGER_QUEUE_CAPACITY = 1000
+        private const val LOG_FILE_MAX_SIZE_BYTES = 8L * 1024L * 1024L
+        private const val LOGGER_QUEUE_CAPACITY = 20000
         private const val UI_THREAD_POOL_SIZE = 4
         private const val IO_THREAD_POOL_SIZE = 8
         private const val UI_RUNNER_TAG = "ui"

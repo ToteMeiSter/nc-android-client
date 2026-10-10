@@ -79,6 +79,7 @@ class AutoUploadWorker(
 
         // Shared by all folders: WorkManager shows one foreground notification per distinct id.
         const val NOTIFICATION_ID = 266
+        private const val DIAG = "AutoUploadDiag"
     }
 
     private val syncFolderHelper = SyncFolderHelper(context)
@@ -105,13 +106,21 @@ class AutoUploadWorker(
             // WorkManager can post the notification of a run that has already ended and never remove it. The
             // system ignores this for the notification of a running foreground service.
             notificationManager.dismissNotification(notificationManager.getId())
+            Log_OC.i(
+                DIAG,
+                "worker start folder=$syncedFolderId attempt=$runAttemptCount override=$overridePowerSaving id=$id"
+            )
 
             syncedFolder = syncedFolderProvider.getSyncedFolderByID(syncedFolderId)
-                ?.takeIf { it.isEnabled } ?: return Result.failure()
+                ?.takeIf { it.isEnabled } ?: run {
+                Log_OC.i(DIAG, "worker exit folder=$syncedFolderId reason=folder-missing-or-disabled -> failure")
+                return Result.failure()
+            }
 
             Log_OC.d(TAG, syncedFolder.getLog())
 
             if (isBlocked(syncedFolderId)) {
+                Log_OC.i(DIAG, "worker exit folder=$syncedFolderId reason=blocked -> success")
                 return Result.success()
             }
 
@@ -122,8 +131,10 @@ class AutoUploadWorker(
             // The scan has to run before the scan interval decides there is nothing to do, otherwise files added
             // since the previous run stay invisible until some other trigger happens to scan them in.
             autoUploadHelper.insertEntries(syncedFolder)
+            Log_OC.i(DIAG, "worker scanned folder=$syncedFolderId lastScan=${syncedFolder.lastScanTimestampMs}")
 
             if (hasNothingToDo()) {
+                Log_OC.i(DIAG, "worker exit folder=$syncedFolderId reason=nothing-to-do -> success")
                 return Result.success()
             }
 
@@ -134,17 +145,26 @@ class AutoUploadWorker(
             syncedFolderProvider.updateSyncFolder(syncedFolder)
 
             Log_OC.d(TAG, "✅ ${syncedFolder.remotePath} completed")
+            Log_OC.i(DIAG, "worker done folder=$syncedFolderId -> success")
             Result.success()
         } catch (e: CancellationException) {
             Log_OC.w(TAG, "⚠️ Job cancelled")
+            Log_OC.i(DIAG, "worker cancelled folder=$syncedFolderId stopReason=${diagStopReason()}")
             throw e
         } catch (e: Exception) {
             Log_OC.e(TAG, "❌ failed: ${e.message}")
+            Log_OC.e(DIAG, "worker exception folder=$syncedFolderId -> failure", e)
             Result.failure()
         } finally {
             AutoUploadProgressTracker.workerFinished(workerId)
             retryPolicy.reset()
         }
+    }
+
+    private fun diagStopReason(): String = if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.S) {
+        stopReason.toString()
+    } else {
+        "n/a"
     }
 
     override suspend fun getForegroundInfo(): ForegroundInfo {
@@ -227,7 +247,10 @@ class AutoUploadWorker(
 
     @Suppress("LongMethod", "DEPRECATION", "TooGenericExceptionCaught")
     private suspend fun uploadFiles(syncedFolder: SyncedFolder) = withContext(Dispatchers.IO) {
-        val user = getUserOrReturn(syncedFolder) ?: return@withContext
+        val user = getUserOrReturn(syncedFolder) ?: run {
+            Log_OC.i(DIAG, "worker upload folder=$syncedFolderId reason=user-missing")
+            return@withContext
+        }
         val ocAccount = OwnCloudAccount(user.toPlatformAccount(), context)
         val client = OwnCloudClientManagerFactory.getDefaultSingleton()
             .getClientFor(ocAccount, context)

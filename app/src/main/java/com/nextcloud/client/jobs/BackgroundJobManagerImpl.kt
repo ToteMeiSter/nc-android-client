@@ -108,6 +108,7 @@ internal class BackgroundJobManagerImpl(
         const val JOB_METADATA_SYNC = "metadata_sync"
         const val JOB_INTERNAL_TWO_WAY_SYNC = "internal_two_way_sync"
         const val JOB_AUTO_UPLOAD_LOCAL_DELETION = "auto_upload_local_deletion"
+        private const val DIAG = "AutoUploadDiag"
 
         const val JOB_TEST = "test_job"
 
@@ -516,6 +517,9 @@ internal class BackgroundJobManagerImpl(
 
     private fun WorkInfo.isIgnoringPowerSaving(): Boolean = tags.any { it.endsWith("_$TAG_SUFFIX_IGNORE_POWER_SAVING") }
 
+    private fun diagUniqueWork(name: String): String = workManager.getWorkInfosForUniqueWork(name).get()
+        .joinToString { "${it.state}(attempt=${it.runAttemptCount},stop=${it.stopReason},next=${it.nextScheduleTimeMillis})" }
+
     override fun schedulePeriodicAutoUpload() {
         val request = periodicRequestBuilder(
             jobClass = AutoUploadRescanWorker::class,
@@ -523,6 +527,7 @@ internal class BackgroundJobManagerImpl(
             constraints = Constraints.Builder().setRequiredNetworkType(NetworkType.CONNECTED).build()
         ).build()
 
+        Log_OC.i(DIAG, "schedule periodic rescan KEEP, existing: ${diagUniqueWork(JOB_PERIODIC_FILES_SYNC)}")
         workManager.enqueueUniquePeriodicWork(JOB_PERIODIC_FILES_SYNC, ExistingPeriodicWorkPolicy.KEEP, request)
     }
 
@@ -562,6 +567,11 @@ internal class BackgroundJobManagerImpl(
         // a scheduled run still carries its own overridePowerSaving flag, so keeping it would swallow the
         // explicit user request and stop on the power saving check
         val policy = if (overridePowerSaving) ExistingWorkPolicy.REPLACE else ExistingWorkPolicy.KEEP
+        Log_OC.i(
+            DIAG,
+            "startAutoUpload folder=$syncedFolderID policy=$policy charging=${syncedFolder.isChargingOnly} " +
+                "existing: ${diagUniqueWork(autoUploadWorkName(syncedFolderID))}"
+        )
 
         workManager.enqueueUniqueWork(
             autoUploadWorkName(syncedFolderID),

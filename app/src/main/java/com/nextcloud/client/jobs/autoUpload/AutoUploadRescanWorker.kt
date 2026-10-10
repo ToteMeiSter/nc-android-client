@@ -29,6 +29,7 @@ class AutoUploadRescanWorker(
     }
 
     override suspend fun doWork(): Result = withContext(Dispatchers.IO) {
+        Log_OC.i("AutoUploadDiag", "rescan start id=$id attempt=$runAttemptCount")
         // cancel enqueued ones so that we can re-start. Some workers may stuck
         // thus we need to have clean start.
         backgroundJobManager.cancelEnqueuedAutoUploads()
@@ -39,6 +40,7 @@ class AutoUploadRescanWorker(
         )
 
         Log_OC.d(TAG, "requested auto upload for $requestedFolders folder(s)")
+        Log_OC.i("AutoUploadDiag", "rescan done requested=$requestedFolders")
 
         Result.success()
     }

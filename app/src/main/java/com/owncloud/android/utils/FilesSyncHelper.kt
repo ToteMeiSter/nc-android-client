@@ -47,7 +47,11 @@ object FilesSyncHelper {
     ): Int {
         val startedFolders = provider.syncedFolders
             .filter { it.isEnabled }
-            .filterNot { manager.isAutoUploadScheduled(it.id) }
+            .filterNot {
+                val scheduled = manager.isAutoUploadScheduled(it.id)
+                Log_OC.i("AutoUploadDiag", "rescan folder=${it.id} alreadyScheduled=$scheduled")
+                scheduled
+            }
             .onEach { manager.startAutoUpload(it) }
 
         Log_OC.d(TAG, "start auto upload for ${startedFolders.size} not already active folder(s)")
@@ -62,6 +66,7 @@ object FilesSyncHelper {
         overridePowerSaving: Boolean
     ): Int {
         Log_OC.d(TAG, "start auto upload worker for each enabled folder")
+        Log_OC.i("AutoUploadDiag", "start all enabled folders override=$overridePowerSaving")
 
         return provider.syncedFolders
             .filter { it.isEnabled }
