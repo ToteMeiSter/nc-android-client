@@ -82,10 +82,11 @@ class AutoUploadWorker(
     private val syncFolderHelper = SyncFolderHelper(context)
     private val fileUploadEventBroadcaster = FileUploadEventBroadcaster(localBroadcastManager)
     private lateinit var syncedFolder: SyncedFolder
+    private val syncedFolderId = inputData.getLong(SYNCED_FOLDER_ID, -1)
     private val notificationManager = AutoUploadNotificationManager(
         context,
         viewThemeUtils,
-        AutoUploadNotificationId.forFolder(params.inputData.getLong(SYNCED_FOLDER_ID, -1))
+        AutoUploadNotificationId.forFolder(syncedFolderId)
     )
     private val fileUploadHelper = FileUploadHelper.instance()
     private val retryPolicy = UploadDelayPolicy()
@@ -98,13 +99,12 @@ class AutoUploadWorker(
         return try {
             trySetForeground()
 
-            val syncFolderId = inputData.getLong(SYNCED_FOLDER_ID, -1)
-            syncedFolder = syncedFolderProvider.getSyncedFolderByID(syncFolderId)
+            syncedFolder = syncedFolderProvider.getSyncedFolderByID(syncedFolderId)
                 ?.takeIf { it.isEnabled } ?: return Result.failure()
 
             Log_OC.d(TAG, syncedFolder.getLog())
 
-            if (isBlocked(syncFolderId)) {
+            if (isBlocked(syncedFolderId)) {
                 return Result.success()
             }
 
