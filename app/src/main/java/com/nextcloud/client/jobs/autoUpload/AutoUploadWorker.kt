@@ -88,7 +88,8 @@ class AutoUploadWorker(
     private val workerId = id
     private val notificationManager = AutoUploadNotificationManager(context, viewThemeUtils, NOTIFICATION_ID)
     private val progressNotifier = AutoUploadProgressNotifier(notificationManager, ::setForeground)
-    private val conditionChecker = AutoUploadConditionChecker(connectivityService, powerManagementService)
+    private val conditionChecker =
+        AutoUploadConditionChecker(connectivityService, powerManagementService, uploadsStorageManager)
     private val fileUploadHelper = FileUploadHelper.instance()
     private val retryPolicy = UploadDelayPolicy()
 
@@ -282,8 +283,9 @@ class AutoUploadWorker(
                         return@forEachIndexed
                     }
 
-                    if (!conditionChecker.areMet(upload, ignoresPowerSaveMode)) {
-                        Log_OC.w(TAG, "upload conditions are not met, skipping: $localPath")
+                    conditionChecker.unmetCondition(upload, ignoresPowerSaveMode)?.let { reason ->
+                        Log_OC.w(TAG, "upload delayed (${reason.name}): $localPath")
+                        conditionChecker.recordDelayed(uploadEntity, upload, reason)
                         return@forEachIndexed
                     }
 

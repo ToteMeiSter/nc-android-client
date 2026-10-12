@@ -156,7 +156,7 @@ class UploadsStorageManager(
         return r
     }
 
-    private fun updateUploadStatus(
+    fun updateUploadStatus(
         id: Long,
         status: UploadStatus?,
         result: UploadResult?,

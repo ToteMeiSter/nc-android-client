@@ -29,6 +29,8 @@ import com.owncloud.android.MainApp
 import com.owncloud.android.datamodel.MediaFolderType
 import com.owncloud.android.datamodel.SyncedFolder
 import com.owncloud.android.datamodel.SyncedFolderProvider
+import com.owncloud.android.datamodel.UploadsStorageManager
+import com.owncloud.android.db.UploadResult
 import com.owncloud.android.lib.common.OwnCloudAccount
 import com.owncloud.android.lib.common.OwnCloudClient
 import com.owncloud.android.lib.common.OwnCloudClientManager
@@ -63,6 +65,7 @@ class AutoUploadWorkerForegroundTest {
     private val repository: FileSystemRepository = mockk(relaxed = true)
     private val syncedFolder: SyncedFolder = mockk(relaxed = true)
     private val syncedFolderProvider: SyncedFolderProvider = mockk(relaxed = true)
+    private val uploadsStorageManager: UploadsStorageManager = mockk(relaxed = true)
     private val connectivityService: ConnectivityService = mockk(relaxed = true)
     private val powerManagementService: PowerManagementService = mockk(relaxed = true)
     private val uploadHelper: FileUploadHelper = mockk(relaxed = true)
@@ -109,7 +112,7 @@ class AutoUploadWorkerForegroundTest {
             context = context,
             params = params,
             userAccountManager = userAccountManager,
-            uploadsStorageManager = mockk(relaxed = true),
+            uploadsStorageManager = uploadsStorageManager,
             connectivityService = connectivityService,
             powerManagementService = powerManagementService,
             syncedFolderProvider = syncedFolderProvider,
@@ -234,6 +237,15 @@ class AutoUploadWorkerForegroundTest {
 
         verify(exactly = 0) { foregroundUpdater.setForegroundAsync(any(), any(), any()) }
         coVerify(exactly = 0) { repository.markFileAsHandled(file.absolutePath, syncedFolder) }
+        verify {
+            uploadsStorageManager.updateUploadStatus(
+                any(),
+                UploadsStorageManager.UploadStatus.UPLOAD_FAILED,
+                UploadResult.DELAYED_FOR_WIFI,
+                any(),
+                any()
+            )
+        }
         file.delete()
     }
 
