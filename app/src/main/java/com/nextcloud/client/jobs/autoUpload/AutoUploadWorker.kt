@@ -7,7 +7,6 @@
 
 package com.nextcloud.client.jobs.autoUpload
 
-import android.app.Notification
 import android.content.Context
 import androidx.localbroadcastmanager.content.LocalBroadcastManager
 import androidx.work.CoroutineWorker
@@ -86,13 +85,18 @@ class AutoUploadWorker(
     private val fileUploadEventBroadcaster = FileUploadEventBroadcaster(localBroadcastManager)
     private lateinit var syncedFolder: SyncedFolder
     private val syncedFolderId = inputData.getLong(SYNCED_FOLDER_ID, -1)
+    private val workerId = id
     private val notificationManager = AutoUploadNotificationManager(context, viewThemeUtils, NOTIFICATION_ID)
-    private var foregroundStarted = false
+    private val progressNotifier = AutoUploadProgressNotifier(notificationManager, ::setForeground)
+    private val conditionChecker = AutoUploadConditionChecker(connectivityService, powerManagementService)
     private val fileUploadHelper = FileUploadHelper.instance()
     private val retryPolicy = UploadDelayPolicy()
 
     private val overridePowerSaving: Boolean
         get() = inputData.getBoolean(OVERRIDE_POWER_SAVING, false)
+
+    private val ignoresPowerSaveMode: Boolean
+        get() = overridePowerSaving || !powerManagementService.blocksAutoUpload
 
     @Suppress("ReturnCount")
     override suspend fun doWork(): Result {
@@ -137,40 +141,15 @@ class AutoUploadWorker(
             Log_OC.e(TAG, "❌ failed: ${e.message}")
             Result.failure()
         } finally {
-            AutoUploadProgressTracker.folderFinished(syncedFolderId)
+            AutoUploadProgressTracker.workerFinished(workerId)
             retryPolicy.reset()
         }
     }
 
     override suspend fun getForegroundInfo(): ForegroundInfo {
-        val notification = createNotification(context.getString(R.string.upload_files))
+        val notification = notificationManager.ongoingNotification(context.getString(R.string.upload_files))
         return notificationManager.getForegroundInfo(notification)
     }
-
-    private suspend fun showUploadProgress(fileName: String) {
-        val notification = notificationManager.progressNotification(AutoUploadProgressTracker.progress(fileName))
-        if (foregroundStarted) {
-            notificationManager.showNotification(notification)
-            return
-        }
-
-        try {
-            setForeground(notificationManager.getForegroundInfo(notification))
-            foregroundStarted = true
-        } catch (e: Exception) {
-            Log_OC.w(TAG, "⚠️ Could not set foreground service: ${e.message}")
-        }
-    }
-
-    private fun createNotification(title: String): Notification = notificationManager.notificationBuilder
-        .setContentTitle(title)
-        .setSmallIcon(R.drawable.uploads)
-        .setOngoing(true)
-        .setSound(null)
-        .setVibrate(null)
-        .setOnlyAlertOnce(true)
-        .setSilent(true)
-        .build()
 
     @Suppress("ReturnCount")
     private fun isBlocked(syncedFolderID: Long): Boolean {
@@ -263,10 +242,11 @@ class AutoUploadWorker(
                 break
             }
             Log_OC.d(TAG, "started, processing batch: lastId=$lastId, count=${filePathsWithIds.size}")
-            AutoUploadProgressTracker.filesFound(syncedFolderId, filePathsWithIds.size)
+            AutoUploadProgressTracker.filesFound(workerId, filePathsWithIds.size)
 
             filePathsWithIds.forEachIndexed { batchIndex, (path, id) ->
                 ensureActive()
+                var uploadAttempted = false
 
                 if (preferences.isGlobalUploadPaused) {
                     Log_OC.w(TAG, "⏸️ uploads paused, stopping auto upload")
@@ -302,6 +282,11 @@ class AutoUploadWorker(
                         return@forEachIndexed
                     }
 
+                    if (!conditionChecker.areMet(upload, ignoresPowerSaveMode)) {
+                        Log_OC.w(TAG, "upload conditions are not met, skipping: $localPath")
+                        return@forEachIndexed
+                    }
+
                     try {
                         // Insert/update to IN_PROGRESS state before starting upload
                         val generatedId = uploadsStorageManager.uploadDao.insertOrReplace(uploadEntity)
@@ -313,13 +298,15 @@ class AutoUploadWorker(
                         val operation = createUploadFileOperation(upload, user)
                         Log_OC.d(TAG, "🕒 uploading: $localPath, id: $generatedId")
 
-                        showUploadProgress(file.name)
+                        progressNotifier.fileStarted(file.name)
+                        uploadAttempted = true
                         FileUploadWorker.registerActiveUpload(operation)
                         val result = try {
                             operation.execute(client)
                         } finally {
                             FileUploadWorker.unregisterActiveUpload(operation.ocUploadId)
                         }
+                        progressNotifier.fileFinished(file.name)
                         fileUploadEventBroadcaster.sendUploadStarted(operation, context)
 
                         UploadErrorNotificationManager.handleResult(
@@ -383,7 +370,11 @@ class AutoUploadWorker(
                 } finally {
                     // update last id so upload can continue where it left
                     lastId = id
-                    AutoUploadProgressTracker.fileProcessed(syncedFolderId)
+                    if (uploadAttempted) {
+                        AutoUploadProgressTracker.fileUploaded(workerId)
+                    } else {
+                        AutoUploadProgressTracker.fileSkipped(workerId)
+                    }
                 }
             }
         }
@@ -476,7 +467,7 @@ class AutoUploadWorker(
         true,
         FileDataStorageManager(user, context.contentResolver)
     ).apply {
-        if (overridePowerSaving || !powerManagementService.blocksAutoUpload) {
+        if (ignoresPowerSaveMode) {
             isIgnoringPowerSaveMode = true
         }
     }

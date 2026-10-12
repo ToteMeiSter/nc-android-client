@@ -7,45 +7,59 @@
 
 package com.nextcloud.client.jobs.autoUpload
 
+import java.util.UUID
+
 /**
- * Progress of all auto upload folders that run at the same time, so that they share one notification.
- * The counters start from zero again when the last active folder has finished.
+ * Progress of all auto upload runs that work at the same time, so that they share one notification.
+ * A run is identified by its worker id because a replaced run of the same folder can overlap with its successor.
+ * The counters start from zero again when the last active run has finished.
  */
 object AutoUploadProgressTracker {
     private val lock = Any()
-    private val pendingByFolder = mutableMapOf<Long, Int>()
+    private val pendingByWorker = mutableMapOf<UUID, Int>()
     private var total = 0
     private var done = 0
 
-    fun filesFound(folderId: Long, fileCount: Int) = synchronized(lock) {
-        pendingByFolder[folderId] = (pendingByFolder[folderId] ?: 0) + fileCount
+    fun filesFound(workerId: UUID, fileCount: Int) = synchronized(lock) {
+        pendingByWorker[workerId] = (pendingByWorker[workerId] ?: 0) + fileCount
         total += fileCount
     }
 
-    fun fileProcessed(folderId: Long) = synchronized(lock) {
-        val pending = pendingByFolder[folderId] ?: return@synchronized
-        pendingByFolder[folderId] = pending - 1
-        done++
+    fun fileUploaded(workerId: UUID) = synchronized(lock) {
+        if (takePending(workerId)) {
+            done++
+        }
     }
 
-    fun progress(fileName: String): AutoUploadProgress = synchronized(lock) {
-        AutoUploadProgress(done = done, total = total, fileName = fileName)
+    fun fileSkipped(workerId: UUID) = synchronized(lock) {
+        if (takePending(workerId)) {
+            total--
+        }
     }
 
-    /** Returns true when no other folder is active any more. */
-    fun folderFinished(folderId: Long): Boolean = synchronized(lock) {
-        val leftover = pendingByFolder.remove(folderId) ?: return@synchronized pendingByFolder.isEmpty()
+    fun progress(fileName: String, fileFinished: Boolean): AutoUploadProgress = synchronized(lock) {
+        val doneIncludingFile = if (fileFinished) done + 1 else done
+        AutoUploadProgress(done = doneIncludingFile, total = total, position = done + 1, fileName = fileName)
+    }
+
+    fun workerFinished(workerId: UUID) = synchronized(lock) {
+        val leftover = pendingByWorker.remove(workerId) ?: return@synchronized
         total -= leftover
-        if (pendingByFolder.isEmpty()) {
+        if (pendingByWorker.isEmpty()) {
             total = 0
             done = 0
         }
-        pendingByFolder.isEmpty()
     }
 
     internal fun reset() = synchronized(lock) {
-        pendingByFolder.clear()
+        pendingByWorker.clear()
         total = 0
         done = 0
+    }
+
+    private fun takePending(workerId: UUID): Boolean {
+        val pending = pendingByWorker[workerId] ?: return false
+        pendingByWorker[workerId] = pending - 1
+        return true
     }
 }

@@ -7,4 +7,4 @@
 
 package com.nextcloud.client.jobs.autoUpload
 
-data class AutoUploadProgress(val done: Int, val total: Int, val fileName: String)
+data class AutoUploadProgress(val done: Int, val total: Int, val position: Int, val fileName: String)

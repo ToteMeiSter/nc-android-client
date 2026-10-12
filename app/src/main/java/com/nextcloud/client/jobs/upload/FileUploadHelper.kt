@@ -101,6 +101,48 @@ class FileUploadHelper {
         fun instance(): FileUploadHelper = sharedInstance
 
         fun buildRemoteName(accountName: String, remotePath: String): String = accountName + remotePath
+
+        /**
+         * Dupe of [UploadFileOperation.checkConditions], needed to check if the upload should even be scheduled
+         * @return [UploadResult.UPLOADED] if the upload should be scheduled, otherwise the reason why it shouldn't
+         */
+        fun checkUploadConditions(
+            upload: OCUpload,
+            connectivity: Connectivity,
+            battery: BatteryStatus,
+            powerManagementService: PowerManagementService,
+            hasGeneralConnection: Boolean,
+            ignorePowerSaveMode: Boolean = false
+        ): UploadResult {
+            var conditions = UploadResult.UPLOADED
+
+            // check that internet is available
+            if (!hasGeneralConnection) {
+                conditions = UploadResult.NETWORK_CONNECTION
+            }
+
+            // check that local file exists; skip the upload otherwise
+            if (!File(upload.localPath).exists()) {
+                conditions = UploadResult.FILE_NOT_FOUND
+            }
+
+            // check that connectivity conditions are met; delay upload otherwise
+            if (upload.isUseWifiOnly && (!connectivity.isWifi || connectivity.isMetered)) {
+                conditions = UploadResult.DELAYED_FOR_WIFI
+            }
+
+            // check if charging conditions are met; delay upload otherwise
+            if (upload.isWhileChargingOnly && !battery.isCharging && !battery.isFull) {
+                conditions = UploadResult.DELAYED_FOR_CHARGING
+            }
+
+            // check that device is not in power save mode; delay upload otherwise
+            if (!ignorePowerSaveMode && powerManagementService.isPowerSavingEnabled) {
+                conditions = UploadResult.DELAYED_IN_POWER_SAVE_MODE
+            }
+
+            return conditions
+        }
     }
 
     /**
@@ -428,47 +470,6 @@ class FileUploadHelper {
     private fun checkConnectivity(connectivityService: ConnectivityService): Boolean {
         // check that connection isn't walled off and that the server is reachable
         return connectivityService.connectivity.isConnected && !connectivityService.isInternetWalled()
-    }
-
-    /**
-     * Dupe of [UploadFileOperation.checkConditions], needed to check if the upload should even be scheduled
-     * @return [UploadResult.UPLOADED] if the upload should be scheduled, otherwise the reason why it shouldn't
-     */
-    private fun checkUploadConditions(
-        upload: OCUpload,
-        connectivity: Connectivity,
-        battery: BatteryStatus,
-        powerManagementService: PowerManagementService,
-        hasGeneralConnection: Boolean
-    ): UploadResult {
-        var conditions = UploadResult.UPLOADED
-
-        // check that internet is available
-        if (!hasGeneralConnection) {
-            conditions = UploadResult.NETWORK_CONNECTION
-        }
-
-        // check that local file exists; skip the upload otherwise
-        if (!File(upload.localPath).exists()) {
-            conditions = UploadResult.FILE_NOT_FOUND
-        }
-
-        // check that connectivity conditions are met; delay upload otherwise
-        if (upload.isUseWifiOnly && (!connectivity.isWifi || connectivity.isMetered)) {
-            conditions = UploadResult.DELAYED_FOR_WIFI
-        }
-
-        // check if charging conditions are met; delay upload otherwise
-        if (upload.isWhileChargingOnly && !battery.isCharging && !battery.isFull) {
-            conditions = UploadResult.DELAYED_FOR_CHARGING
-        }
-
-        // check that device is not in power save mode; delay upload otherwise
-        if (powerManagementService.isPowerSavingEnabled) {
-            conditions = UploadResult.DELAYED_IN_POWER_SAVE_MODE
-        }
-
-        return conditions
     }
 
     @Suppress("ReturnCount")

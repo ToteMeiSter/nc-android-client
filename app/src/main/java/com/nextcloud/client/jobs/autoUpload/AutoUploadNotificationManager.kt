@@ -27,7 +27,7 @@ class AutoUploadNotificationManager(private val appContext: Context, viewThemeUt
         val title = if (progress.total > 1) {
             appContext.getString(
                 R.string.upload_notification_manager_start_text,
-                progress.done + 1,
+                progress.position,
                 progress.total,
                 progress.fileName
             )
@@ -35,15 +35,18 @@ class AutoUploadNotificationManager(private val appContext: Context, viewThemeUt
             progress.fileName
         }
 
-        return notificationBuilder
-            .setContentTitle(title)
-            .setProgress(progress.total, progress.done, false)
-            .setSmallIcon(R.drawable.uploads)
-            .setOngoing(true)
-            .setSound(null)
-            .setVibrate(null)
-            .setOnlyAlertOnce(true)
-            .setSilent(true)
-            .build()
+        return ongoingNotification(title, progress.total, progress.done)
     }
+
+    // A new builder per notification: the shared one also carries the content of upload error notifications.
+    fun ongoingNotification(title: String, max: Int = 0, progress: Int = 0): Notification = createNotificationBuilder()
+        .setContentTitle(title)
+        .setProgress(max, progress, false)
+        .setSmallIcon(R.drawable.uploads)
+        .setOngoing(true)
+        .setSound(null)
+        .setVibrate(null)
+        .setOnlyAlertOnce(true)
+        .setSilent(true)
+        .build()
 }

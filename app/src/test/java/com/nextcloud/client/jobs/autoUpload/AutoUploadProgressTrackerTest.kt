@@ -9,12 +9,14 @@ package com.nextcloud.client.jobs.autoUpload
 
 import org.junit.After
 import org.junit.Assert.assertEquals
-import org.junit.Assert.assertFalse
-import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Test
+import java.util.UUID
 
 class AutoUploadProgressTrackerTest {
+
+    private val first = UUID.randomUUID()
+    private val second = UUID.randomUUID()
 
     @Before
     fun setUp() {
@@ -26,61 +28,94 @@ class AutoUploadProgressTrackerTest {
         AutoUploadProgressTracker.reset()
     }
 
-    @Test
-    fun foldersShareOneProgress() {
-        AutoUploadProgressTracker.filesFound(FIRST_FOLDER, 3)
-        AutoUploadProgressTracker.filesFound(SECOND_FOLDER, 2)
-        AutoUploadProgressTracker.fileProcessed(FIRST_FOLDER)
-        AutoUploadProgressTracker.fileProcessed(SECOND_FOLDER)
+    private fun progress(fileFinished: Boolean = false) = AutoUploadProgressTracker.progress(FILE, fileFinished)
 
-        assertEquals(AutoUploadProgress(done = 2, total = 5, fileName = FILE), AutoUploadProgressTracker.progress(FILE))
+    @Test
+    fun workersShareOneProgress() {
+        AutoUploadProgressTracker.filesFound(first, 3)
+        AutoUploadProgressTracker.filesFound(second, 2)
+        AutoUploadProgressTracker.fileUploaded(first)
+        AutoUploadProgressTracker.fileUploaded(second)
+
+        assertEquals(AutoUploadProgress(done = 2, total = 5, position = 3, fileName = FILE), progress())
     }
 
     @Test
-    fun notificationStaysWhileAnotherFolderIsActive() {
-        AutoUploadProgressTracker.filesFound(FIRST_FOLDER, 1)
-        AutoUploadProgressTracker.filesFound(SECOND_FOLDER, 1)
-        AutoUploadProgressTracker.fileProcessed(FIRST_FOLDER)
+    fun finishedFileCountsAsDoneInItsOwnUpdate() {
+        AutoUploadProgressTracker.filesFound(first, 3)
 
-        val noneLeft = AutoUploadProgressTracker.folderFinished(FIRST_FOLDER)
-
-        assertFalse(noneLeft)
-        assertEquals(AutoUploadProgress(done = 1, total = 2, fileName = FILE), AutoUploadProgressTracker.progress(FILE))
+        assertEquals(AutoUploadProgress(done = 1, total = 3, position = 1, fileName = FILE), progress(true))
     }
 
     @Test
-    fun progressStartsOverAfterLastFolderFinished() {
-        AutoUploadProgressTracker.filesFound(FIRST_FOLDER, 1)
-        AutoUploadProgressTracker.filesFound(SECOND_FOLDER, 1)
-        AutoUploadProgressTracker.fileProcessed(FIRST_FOLDER)
-        AutoUploadProgressTracker.fileProcessed(SECOND_FOLDER)
-        AutoUploadProgressTracker.folderFinished(FIRST_FOLDER)
+    fun progressStaysWhileAnotherWorkerIsActive() {
+        AutoUploadProgressTracker.filesFound(first, 1)
+        AutoUploadProgressTracker.filesFound(second, 1)
+        AutoUploadProgressTracker.fileUploaded(first)
 
-        val noneLeft = AutoUploadProgressTracker.folderFinished(SECOND_FOLDER)
+        AutoUploadProgressTracker.workerFinished(first)
 
-        assertTrue(noneLeft)
-        assertEquals(AutoUploadProgress(done = 0, total = 0, fileName = FILE), AutoUploadProgressTracker.progress(FILE))
+        assertEquals(AutoUploadProgress(done = 1, total = 2, position = 2, fileName = FILE), progress())
     }
 
     @Test
-    fun unprocessedFilesOfStoppedFolderLeaveTheTotal() {
-        AutoUploadProgressTracker.filesFound(FIRST_FOLDER, 4)
-        AutoUploadProgressTracker.filesFound(SECOND_FOLDER, 1)
-        AutoUploadProgressTracker.fileProcessed(FIRST_FOLDER)
+    fun progressStartsOverAfterLastWorkerFinished() {
+        AutoUploadProgressTracker.filesFound(first, 1)
+        AutoUploadProgressTracker.filesFound(second, 1)
+        AutoUploadProgressTracker.fileUploaded(first)
+        AutoUploadProgressTracker.fileUploaded(second)
+        AutoUploadProgressTracker.workerFinished(first)
 
-        AutoUploadProgressTracker.folderFinished(FIRST_FOLDER)
+        AutoUploadProgressTracker.workerFinished(second)
 
-        assertEquals(AutoUploadProgress(done = 1, total = 2, fileName = FILE), AutoUploadProgressTracker.progress(FILE))
+        assertEquals(AutoUploadProgress(done = 0, total = 0, position = 1, fileName = FILE), progress())
     }
 
     @Test
-    fun folderWithoutFilesDoesNotKeepNotificationAlive() {
-        assertTrue(AutoUploadProgressTracker.folderFinished(FIRST_FOLDER))
+    fun unprocessedFilesOfStoppedWorkerLeaveTheTotal() {
+        AutoUploadProgressTracker.filesFound(first, 4)
+        AutoUploadProgressTracker.filesFound(second, 1)
+        AutoUploadProgressTracker.fileUploaded(first)
+
+        AutoUploadProgressTracker.workerFinished(first)
+
+        assertEquals(AutoUploadProgress(done = 1, total = 2, position = 2, fileName = FILE), progress())
+    }
+
+    @Test
+    fun skippedFilesLeaveTheTotalAndDoNotCountAsDone() {
+        AutoUploadProgressTracker.filesFound(first, 5)
+        AutoUploadProgressTracker.fileSkipped(first)
+        AutoUploadProgressTracker.fileSkipped(first)
+        AutoUploadProgressTracker.fileUploaded(first)
+
+        assertEquals(AutoUploadProgress(done = 1, total = 3, position = 2, fileName = FILE), progress())
+    }
+
+    @Test
+    fun replacedRunOfSameFolderDoesNotResetTheRunThatReplacedIt() {
+        val replacedRun = UUID.randomUUID()
+        val newRun = UUID.randomUUID()
+        AutoUploadProgressTracker.filesFound(replacedRun, 2)
+        AutoUploadProgressTracker.filesFound(newRun, 3)
+        AutoUploadProgressTracker.fileUploaded(newRun)
+
+        AutoUploadProgressTracker.workerFinished(replacedRun)
+
+        assertEquals(AutoUploadProgress(done = 1, total = 3, position = 2, fileName = FILE), progress())
+    }
+
+    @Test
+    fun workerWithoutFilesChangesNothing() {
+        AutoUploadProgressTracker.filesFound(first, 2)
+
+        AutoUploadProgressTracker.workerFinished(second)
+        AutoUploadProgressTracker.fileSkipped(second)
+
+        assertEquals(AutoUploadProgress(done = 0, total = 2, position = 1, fileName = FILE), progress())
     }
 
     private companion object {
-        const val FIRST_FOLDER = 1L
-        const val SECOND_FOLDER = 2L
         const val FILE = "a.jpg"
     }
 }

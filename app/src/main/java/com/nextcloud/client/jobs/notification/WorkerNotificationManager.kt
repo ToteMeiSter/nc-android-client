@@ -23,27 +23,28 @@ import com.owncloud.android.utils.theme.ViewThemeUtils
 open class WorkerNotificationManager(
     private val id: Int,
     private val context: Context,
-    viewThemeUtils: ViewThemeUtils?,
+    private val viewThemeUtils: ViewThemeUtils?,
     private val tickerId: Int,
-    channelId: String
+    private val channelId: String
 ) {
     var currentOperationTitle: String? = null
 
     val notificationManager = context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
 
-    var notificationBuilder: NotificationCompat.Builder =
-        NotificationCompat.Builder(context, channelId).apply {
-            setTicker(context.getString(tickerId))
-            setSmallIcon(R.drawable.notification_icon)
-            setLargeIcon(BitmapFactory.decodeResource(context.resources, R.drawable.notification_icon))
-            setStyle(NotificationCompat.BigTextStyle())
-            priority = NotificationCompat.PRIORITY_LOW
-            setSound(null)
-            setVibrate(null)
-            setOnlyAlertOnce(true)
-            setSilent(true)
-            viewThemeUtils?.androidx?.themeNotificationCompatBuilder(context, this)
-        }
+    var notificationBuilder: NotificationCompat.Builder = createNotificationBuilder()
+
+    fun createNotificationBuilder(): NotificationCompat.Builder = NotificationCompat.Builder(context, channelId).apply {
+        setTicker(context.getString(tickerId))
+        setSmallIcon(R.drawable.notification_icon)
+        setLargeIcon(BitmapFactory.decodeResource(context.resources, R.drawable.notification_icon))
+        setStyle(NotificationCompat.BigTextStyle())
+        priority = NotificationCompat.PRIORITY_LOW
+        setSound(null)
+        setVibrate(null)
+        setOnlyAlertOnce(true)
+        setSilent(true)
+        viewThemeUtils?.androidx?.themeNotificationCompatBuilder(context, this)
+    }
 
     fun showNotification() {
         notificationManager.notify(id, notificationBuilder.build())
