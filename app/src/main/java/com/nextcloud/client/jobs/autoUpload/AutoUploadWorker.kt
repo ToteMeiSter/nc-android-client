@@ -77,17 +77,17 @@ class AutoUploadWorker(
         const val TAG = "🔄📤" + "AutoUpload"
         const val OVERRIDE_POWER_SAVING = "overridePowerSaving"
         const val SYNCED_FOLDER_ID = "syncedFolderId"
+
+        // Shared by all folders: WorkManager shows one foreground notification per distinct id.
+        const val NOTIFICATION_ID = 266
     }
 
     private val syncFolderHelper = SyncFolderHelper(context)
     private val fileUploadEventBroadcaster = FileUploadEventBroadcaster(localBroadcastManager)
     private lateinit var syncedFolder: SyncedFolder
     private val syncedFolderId = inputData.getLong(SYNCED_FOLDER_ID, -1)
-    private val notificationManager = AutoUploadNotificationManager(
-        context,
-        viewThemeUtils,
-        AutoUploadNotificationId.forFolder(syncedFolderId)
-    )
+    private val notificationManager = AutoUploadNotificationManager(context, viewThemeUtils, NOTIFICATION_ID)
+    private var foregroundStarted = false
     private val fileUploadHelper = FileUploadHelper.instance()
     private val retryPolicy = UploadDelayPolicy()
 
@@ -97,7 +97,8 @@ class AutoUploadWorker(
     @Suppress("ReturnCount")
     override suspend fun doWork(): Result {
         return try {
-            // WorkManager can post the notification of a run that has already ended and never remove it
+            // WorkManager can post the notification of a run that has already ended and never remove it. The
+            // system ignores this for the notification of a running foreground service.
             notificationManager.dismissNotification(notificationManager.getId())
 
             syncedFolder = syncedFolderProvider.getSyncedFolderByID(syncedFolderId)
@@ -121,10 +122,6 @@ class AutoUploadWorker(
                 return Result.success()
             }
 
-            // a run without files ends within milliseconds, the same WorkManager race would leave its notification
-            if (repository.hasPendingFiles(syncedFolder)) {
-                trySetForeground()
-            }
             uploadFiles(syncedFolder)
 
             // only update last scan time after uploading files
@@ -140,6 +137,7 @@ class AutoUploadWorker(
             Log_OC.e(TAG, "❌ failed: ${e.message}")
             Result.failure()
         } finally {
+            AutoUploadProgressTracker.folderFinished(syncedFolderId)
             retryPolicy.reset()
         }
     }
@@ -149,28 +147,16 @@ class AutoUploadWorker(
         return notificationManager.getForegroundInfo(notification)
     }
 
-    private suspend fun updateNotification() {
-        getStartNotificationTitle()?.let { (localFolderName, remoteFolderName) ->
-            try {
-                val startNotification = createNotification(
-                    context.getString(
-                        R.string.auto_upload_worker_start_text,
-                        localFolderName,
-                        remoteFolderName
-                    )
-                )
-
-                setForeground(notificationManager.getForegroundInfo(startNotification))
-            } catch (e: Exception) {
-                Log_OC.w(TAG, "⚠️ Could not update notification: ${e.message}")
-            }
+    private suspend fun showUploadProgress(fileName: String) {
+        val notification = notificationManager.progressNotification(AutoUploadProgressTracker.progress(fileName))
+        if (foregroundStarted) {
+            notificationManager.showNotification(notification)
+            return
         }
-    }
 
-    private suspend fun trySetForeground() {
         try {
-            val notification = createNotification(context.getString(R.string.upload_files))
             setForeground(notificationManager.getForegroundInfo(notification))
+            foregroundStarted = true
         } catch (e: Exception) {
             Log_OC.w(TAG, "⚠️ Could not set foreground service: ${e.message}")
         }
@@ -185,23 +171,6 @@ class AutoUploadWorker(
         .setOnlyAlertOnce(true)
         .setSilent(true)
         .build()
-
-    @Suppress("TooGenericExceptionCaught")
-    private fun getStartNotificationTitle(): Pair<String, String>? = try {
-        val localPath = syncedFolder.localPath
-        val remotePath = syncedFolder.remotePath
-        if (localPath.isBlank() || remotePath.isBlank()) {
-            null
-        } else {
-            try {
-                File(localPath).name to File(remotePath).name
-            } catch (_: Exception) {
-                null
-            }
-        }
-    } catch (_: Exception) {
-        null
-    }
 
     @Suppress("ReturnCount")
     private fun isBlocked(syncedFolderID: Long): Boolean {
@@ -284,8 +253,6 @@ class AutoUploadWorker(
             .getClientFor(ocAccount, context)
         val capability = CapabilityUtils.getCapability(user, context)
 
-        updateNotification()
-
         var lastId = 0
 
         while (isActive) {
@@ -296,6 +263,7 @@ class AutoUploadWorker(
                 break
             }
             Log_OC.d(TAG, "started, processing batch: lastId=$lastId, count=${filePathsWithIds.size}")
+            AutoUploadProgressTracker.filesFound(syncedFolderId, filePathsWithIds.size)
 
             filePathsWithIds.forEachIndexed { batchIndex, (path, id) ->
                 ensureActive()
@@ -345,6 +313,7 @@ class AutoUploadWorker(
                         val operation = createUploadFileOperation(upload, user)
                         Log_OC.d(TAG, "🕒 uploading: $localPath, id: $generatedId")
 
+                        showUploadProgress(file.name)
                         FileUploadWorker.registerActiveUpload(operation)
                         val result = try {
                             operation.execute(client)
@@ -414,6 +383,7 @@ class AutoUploadWorker(
                 } finally {
                     // update last id so upload can continue where it left
                     lastId = id
+                    AutoUploadProgressTracker.fileProcessed(syncedFolderId)
                 }
             }
         }
