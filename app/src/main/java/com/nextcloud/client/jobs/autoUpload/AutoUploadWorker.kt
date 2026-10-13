@@ -318,7 +318,8 @@ class AutoUploadWorker(
                             result,
                             onLocked = {
                                 retryPolicy.increase()
-                            }
+                            },
+                            keepGeneralErrorsAfterRun = true
                         )
 
                         if (result.isSuccess) {

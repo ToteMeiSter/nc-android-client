@@ -44,6 +44,9 @@ object UploadErrorNotificationManager {
      * by checking if the remote file is identical. If it's a "real" conflict or error,
      * it displays a notification with relevant actions (e.g., Resolve Conflict, Pause, Cancel).
      *
+     * @param keepGeneralErrorsAfterRun when true, errors that are not tied to one file (for example expired
+     * credentials) are shown under a stable per-account ID on their own builder, so they survive the end of the
+     * worker run, which removes the notification the worker used as its foreground notification.
      * @param onSameFileConflict Triggered only if result code is CONFLICT or SYNC_CONFLICT and files are identical.
      */
     @Suppress("ReturnCount")
@@ -53,7 +56,8 @@ object UploadErrorNotificationManager {
         operation: UploadFileOperation,
         result: RemoteOperationResult<Any?>,
         onSameFileConflict: suspend () -> Unit = {},
-        onLocked: () -> Unit = {}
+        onLocked: () -> Unit = {},
+        keepGeneralErrorsAfterRun: Boolean = false
     ) {
         Log_OC.d(TAG, "handle upload result with result code: " + result.code)
 
@@ -98,9 +102,15 @@ object UploadErrorNotificationManager {
         }
 
         // now we can show error notification
+        val builder = if (keepGeneralErrorsAfterRun) {
+            notificationManager.createNotificationBuilder()
+        } else {
+            notificationManager.notificationBuilder
+        }
+
         val notification = getNotification(
             context,
-            notificationManager.notificationBuilder,
+            builder,
             operation,
             result
         )
@@ -115,6 +125,9 @@ object UploadErrorNotificationManager {
             // if error code is file specific show new notification for each file
             if (result.code.isFileSpecificError()) {
                 notificationManager.showNotification(operation.ocUploadId.toInt(), notification)
+            } else if (keepGeneralErrorsAfterRun) {
+                val id = UploadErrorNotificationIds.forGeneralError(operation.user.accountName, result.code)
+                notificationManager.showNotification(id, notification)
             } else {
                 notificationManager.showNotification(notification)
             }
