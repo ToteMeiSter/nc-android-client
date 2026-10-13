@@ -7,7 +7,6 @@
 
 package com.nextcloud.client.jobs.autoUpload
 
-import android.app.Notification
 import android.content.Context
 import androidx.localbroadcastmanager.content.LocalBroadcastManager
 import androidx.work.CoroutineWorker
@@ -77,31 +76,42 @@ class AutoUploadWorker(
         const val TAG = "🔄📤" + "AutoUpload"
         const val OVERRIDE_POWER_SAVING = "overridePowerSaving"
         const val SYNCED_FOLDER_ID = "syncedFolderId"
+
+        // Shared by all folders: WorkManager shows one foreground notification per distinct id.
         const val NOTIFICATION_ID = 266
     }
 
     private val syncFolderHelper = SyncFolderHelper(context)
     private val fileUploadEventBroadcaster = FileUploadEventBroadcaster(localBroadcastManager)
     private lateinit var syncedFolder: SyncedFolder
+    private val syncedFolderId = inputData.getLong(SYNCED_FOLDER_ID, -1)
+    private val workerId = id
     private val notificationManager = AutoUploadNotificationManager(context, viewThemeUtils, NOTIFICATION_ID)
+    private val progressNotifier = AutoUploadProgressNotifier(notificationManager, ::setForeground)
+    private val conditionChecker =
+        AutoUploadConditionChecker(connectivityService, powerManagementService, uploadsStorageManager)
     private val fileUploadHelper = FileUploadHelper.instance()
     private val retryPolicy = UploadDelayPolicy()
 
     private val overridePowerSaving: Boolean
         get() = inputData.getBoolean(OVERRIDE_POWER_SAVING, false)
 
+    private val ignoresPowerSaveMode: Boolean
+        get() = overridePowerSaving || !powerManagementService.blocksAutoUpload
+
     @Suppress("ReturnCount")
     override suspend fun doWork(): Result {
         return try {
-            trySetForeground()
+            // WorkManager can post the notification of a run that has already ended and never remove it. The
+            // system ignores this for the notification of a running foreground service.
+            notificationManager.dismissNotification(notificationManager.getId())
 
-            val syncFolderId = inputData.getLong(SYNCED_FOLDER_ID, -1)
-            syncedFolder = syncedFolderProvider.getSyncedFolderByID(syncFolderId)
+            syncedFolder = syncedFolderProvider.getSyncedFolderByID(syncedFolderId)
                 ?.takeIf { it.isEnabled } ?: return Result.failure()
 
             Log_OC.d(TAG, syncedFolder.getLog())
 
-            if (isBlocked(syncFolderId)) {
+            if (isBlocked(syncedFolderId)) {
                 return Result.success()
             }
 
@@ -132,67 +142,14 @@ class AutoUploadWorker(
             Log_OC.e(TAG, "❌ failed: ${e.message}")
             Result.failure()
         } finally {
+            AutoUploadProgressTracker.workerFinished(workerId)
             retryPolicy.reset()
         }
     }
 
     override suspend fun getForegroundInfo(): ForegroundInfo {
-        val notification = createNotification(context.getString(R.string.upload_files))
+        val notification = notificationManager.ongoingNotification(context.getString(R.string.upload_files))
         return notificationManager.getForegroundInfo(notification)
-    }
-
-    private suspend fun updateNotification() {
-        getStartNotificationTitle()?.let { (localFolderName, remoteFolderName) ->
-            try {
-                val startNotification = createNotification(
-                    context.getString(
-                        R.string.auto_upload_worker_start_text,
-                        localFolderName,
-                        remoteFolderName
-                    )
-                )
-
-                setForeground(notificationManager.getForegroundInfo(startNotification))
-            } catch (e: Exception) {
-                Log_OC.w(TAG, "⚠️ Could not update notification: ${e.message}")
-            }
-        }
-    }
-
-    private suspend fun trySetForeground() {
-        try {
-            val notification = createNotification(context.getString(R.string.upload_files))
-            setForeground(notificationManager.getForegroundInfo(notification))
-        } catch (e: Exception) {
-            Log_OC.w(TAG, "⚠️ Could not set foreground service: ${e.message}")
-        }
-    }
-
-    private fun createNotification(title: String): Notification = notificationManager.notificationBuilder
-        .setContentTitle(title)
-        .setSmallIcon(R.drawable.uploads)
-        .setOngoing(true)
-        .setSound(null)
-        .setVibrate(null)
-        .setOnlyAlertOnce(true)
-        .setSilent(true)
-        .build()
-
-    @Suppress("TooGenericExceptionCaught")
-    private fun getStartNotificationTitle(): Pair<String, String>? = try {
-        val localPath = syncedFolder.localPath
-        val remotePath = syncedFolder.remotePath
-        if (localPath.isBlank() || remotePath.isBlank()) {
-            null
-        } else {
-            try {
-                File(localPath).name to File(remotePath).name
-            } catch (_: Exception) {
-                null
-            }
-        }
-    } catch (_: Exception) {
-        null
     }
 
     @Suppress("ReturnCount")
@@ -276,8 +233,6 @@ class AutoUploadWorker(
             .getClientFor(ocAccount, context)
         val capability = CapabilityUtils.getCapability(user, context)
 
-        updateNotification()
-
         var lastId = 0
 
         while (isActive) {
@@ -288,9 +243,11 @@ class AutoUploadWorker(
                 break
             }
             Log_OC.d(TAG, "started, processing batch: lastId=$lastId, count=${filePathsWithIds.size}")
+            AutoUploadProgressTracker.filesFound(workerId, filePathsWithIds.size)
 
             filePathsWithIds.forEachIndexed { batchIndex, (path, id) ->
                 ensureActive()
+                var uploadAttempted = false
 
                 if (preferences.isGlobalUploadPaused) {
                     Log_OC.w(TAG, "⏸️ uploads paused, stopping auto upload")
@@ -326,6 +283,12 @@ class AutoUploadWorker(
                         return@forEachIndexed
                     }
 
+                    conditionChecker.unmetCondition(upload, ignoresPowerSaveMode)?.let { reason ->
+                        Log_OC.w(TAG, "upload delayed (${reason.name}): $localPath")
+                        conditionChecker.recordDelayed(uploadEntity, upload, reason)
+                        return@forEachIndexed
+                    }
+
                     try {
                         // Insert/update to IN_PROGRESS state before starting upload
                         val generatedId = uploadsStorageManager.uploadDao.insertOrReplace(uploadEntity)
@@ -337,12 +300,15 @@ class AutoUploadWorker(
                         val operation = createUploadFileOperation(upload, user)
                         Log_OC.d(TAG, "🕒 uploading: $localPath, id: $generatedId")
 
+                        progressNotifier.fileStarted(file.name)
+                        uploadAttempted = true
                         FileUploadWorker.registerActiveUpload(operation)
                         val result = try {
                             operation.execute(client)
                         } finally {
                             FileUploadWorker.unregisterActiveUpload(operation.ocUploadId)
                         }
+                        progressNotifier.fileFinished(file.name)
                         fileUploadEventBroadcaster.sendUploadStarted(operation, context)
 
                         UploadErrorNotificationManager.handleResult(
@@ -406,6 +372,11 @@ class AutoUploadWorker(
                 } finally {
                     // update last id so upload can continue where it left
                     lastId = id
+                    if (uploadAttempted) {
+                        AutoUploadProgressTracker.fileUploaded(workerId)
+                    } else {
+                        AutoUploadProgressTracker.fileSkipped(workerId)
+                    }
                 }
             }
         }
@@ -498,7 +469,7 @@ class AutoUploadWorker(
         true,
         FileDataStorageManager(user, context.contentResolver)
     ).apply {
-        if (overridePowerSaving || !powerManagementService.blocksAutoUpload) {
+        if (ignoresPowerSaveMode) {
             isIgnoringPowerSaveMode = true
         }
     }
