@@ -21,6 +21,9 @@ import com.owncloud.android.lib.resources.status.OwnCloudVersion
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.StandardTestDispatcher
+import kotlinx.coroutines.test.TestScope
+import kotlinx.coroutines.test.advanceTimeBy
+import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.resetMain
 import kotlinx.coroutines.test.setMain
 import org.apache.commons.httpclient.HttpStatus
@@ -44,6 +47,7 @@ import org.mockito.kotlin.times
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
 import java.net.URI
+import kotlin.time.Duration.Companion.milliseconds
 
 @RunWith(Suite::class)
 @Suite.SuiteClasses(
@@ -51,7 +55,8 @@ import java.net.URI
     ConnectivityServiceTest.IsConnected::class,
     ConnectivityServiceTest.WifiConnectionWalledStatusOnLegacyServer::class,
     ConnectivityServiceTest.WifiConnectionWalledStatus::class,
-    ConnectivityServiceTest.LocalNetworkFallback::class
+    ConnectivityServiceTest.LocalNetworkFallback::class,
+    ConnectivityServiceTest.CapabilityChanges::class
 )
 class ConnectivityServiceTest {
 
@@ -432,6 +437,79 @@ class ConnectivityServiceTest {
             assertFalse(connectivityService.isConnected)
             assertTrue(connectivityService.isInternetWalled())
             verify(requestBuilder, never()).invoke(any())
+        }
+    }
+
+    @OptIn(ExperimentalCoroutinesApi::class)
+    internal class CapabilityChanges : Base() {
+        private val testScope = TestScope()
+        private lateinit var callback: ConnectivityManager.NetworkCallback
+
+        @Before
+        fun createServiceWithTestScope() {
+            val service = ConnectivityServiceImpl(
+                context,
+                accountManager,
+                clientFactory,
+                requestBuilder,
+                walledCheckCache,
+                testScope
+            )
+            val captor = argumentCaptor<ConnectivityManager.NetworkCallback>()
+            verify(platformConnectivityManager, times(2)).registerDefaultNetworkCallback(captor.capture())
+            callback = captor.lastValue
+            connectivityService = service
+        }
+
+        private fun setMetered(metered: Boolean) {
+            whenever(networkCapabilities.hasCapability(NetworkCapabilities.NET_CAPABILITY_NOT_METERED))
+                .thenReturn(!metered)
+        }
+
+        private fun advancePastWindow() {
+            testScope.advanceTimeBy(ConnectivityServiceImpl.CAPABILITY_CHANGE_WINDOW + 1.milliseconds)
+            testScope.runCurrent()
+        }
+
+        @Test
+        fun `capability change inside the window is applied when the window closes`() {
+            assertFalse("precondition: wifi starts unmetered", connectivityService.connectivity.isMetered)
+
+            setMetered(true)
+            callback.onCapabilitiesChanged(network, networkCapabilities)
+            assertTrue("first change is applied immediately", connectivityService.connectivity.isMetered)
+
+            setMetered(false)
+            callback.onCapabilitiesChanged(network, networkCapabilities)
+            assertTrue("change inside the window is not applied yet", connectivityService.connectivity.isMetered)
+
+            advancePastWindow()
+            assertFalse("deferred change is applied after the window", connectivityService.connectivity.isMetered)
+        }
+
+        @Test
+        fun `burst of changes inside the window triggers one update`() {
+            callback.onCapabilitiesChanged(network, networkCapabilities)
+            clearInvocations(platformConnectivityManager)
+
+            repeat(BURST_SIZE) { callback.onCapabilitiesChanged(network, networkCapabilities) }
+            verify(platformConnectivityManager, never()).getNetworkCapabilities(any())
+
+            advancePastWindow()
+            verify(platformConnectivityManager, times(1)).getNetworkCapabilities(network)
+        }
+
+        @Test
+        fun `no update runs after the window when nothing was deferred`() {
+            callback.onCapabilitiesChanged(network, networkCapabilities)
+            clearInvocations(platformConnectivityManager)
+
+            advancePastWindow()
+            verify(platformConnectivityManager, never()).getNetworkCapabilities(any())
+        }
+
+        private companion object {
+            const val BURST_SIZE = 5
         }
     }
 }
