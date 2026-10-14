@@ -10,7 +10,6 @@ import android.content.Context
 import android.net.ConnectivityManager
 import android.net.Network
 import android.net.NetworkCapabilities
-import android.os.SystemClock
 import com.nextcloud.client.account.UserAccountManager
 import com.nextcloud.operations.GetMethod
 import com.owncloud.android.lib.common.utils.Log_OC
@@ -25,7 +24,6 @@ import java.net.ConnectException
 import java.net.SocketTimeoutException
 import java.net.UnknownHostException
 import javax.net.ssl.SSLException
-import kotlin.time.Duration.Companion.seconds
 
 @Suppress("TooGenericExceptionCaught", "ReturnCount")
 class ConnectivityServiceImpl(
@@ -39,8 +37,6 @@ class ConnectivityServiceImpl(
     companion object {
         private const val TAG = "ConnectivityServiceImpl"
         private const val CONNECTIVITY_CHECK_ROUTE = "/index.php/204"
-
-        private val CAPABILITY_CHANGE_DEBOUNCE = 15.seconds
     }
 
     // region private values
@@ -48,7 +44,6 @@ class ConnectivityServiceImpl(
     private var notifyJob: Job? = null
     private val connectivityManager = context.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
     private val listeners = mutableSetOf<NetworkChangeListener>()
-    private var lastCapabilityCheckMs: Long? = null
 
     @Volatile
     private var currentConnectivity: Connectivity = Connectivity.DISCONNECTED
@@ -63,10 +58,6 @@ class ConnectivityServiceImpl(
         }
 
         override fun onCapabilitiesChanged(network: Network, networkCapabilities: NetworkCapabilities) {
-            if (!shouldHandleCapabilityChange()) {
-                return
-            }
-
             Log_OC.d(TAG, "resolving network capabilities to compare")
             updateConnectivity()
         }
@@ -201,17 +192,6 @@ class ConnectivityServiceImpl(
     // endregion
 
     // region private methods
-    private fun shouldHandleCapabilityChange(): Boolean {
-        val now = SystemClock.elapsedRealtime()
-        val last = lastCapabilityCheckMs
-        if (last != null && now - last < CAPABILITY_CHANGE_DEBOUNCE.inWholeMilliseconds) {
-            return false
-        }
-
-        lastCapabilityCheckMs = now
-        return true
-    }
-
     private fun notifyListeners() {
         if (listeners.isEmpty()) {
             return

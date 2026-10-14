@@ -51,7 +51,8 @@ import java.net.URI
     ConnectivityServiceTest.IsConnected::class,
     ConnectivityServiceTest.WifiConnectionWalledStatusOnLegacyServer::class,
     ConnectivityServiceTest.WifiConnectionWalledStatus::class,
-    ConnectivityServiceTest.LocalNetworkFallback::class
+    ConnectivityServiceTest.LocalNetworkFallback::class,
+    ConnectivityServiceTest.CapabilityChanges::class
 )
 class ConnectivityServiceTest {
 
@@ -432,6 +433,30 @@ class ConnectivityServiceTest {
             assertFalse(connectivityService.isConnected)
             assertTrue(connectivityService.isInternetWalled())
             verify(requestBuilder, never()).invoke(any())
+        }
+    }
+
+    internal class CapabilityChanges : Base() {
+        private fun registeredCallback(): ConnectivityManager.NetworkCallback {
+            val captor = argumentCaptor<ConnectivityManager.NetworkCallback>()
+            verify(platformConnectivityManager).registerDefaultNetworkCallback(captor.capture())
+            return captor.firstValue
+        }
+
+        @Test
+        fun `consecutive capability changes are all applied`() {
+            val callback = registeredCallback()
+            assertFalse("precondition: wifi starts unmetered", connectivityService.connectivity.isMetered)
+
+            whenever(networkCapabilities.hasCapability(NetworkCapabilities.NET_CAPABILITY_NOT_METERED))
+                .thenReturn(false)
+            callback.onCapabilitiesChanged(network, networkCapabilities)
+            assertTrue("wifi should become metered", connectivityService.connectivity.isMetered)
+
+            whenever(networkCapabilities.hasCapability(NetworkCapabilities.NET_CAPABILITY_NOT_METERED))
+                .thenReturn(true)
+            callback.onCapabilitiesChanged(network, networkCapabilities)
+            assertFalse("wifi should become unmetered again", connectivityService.connectivity.isMetered)
         }
     }
 }
