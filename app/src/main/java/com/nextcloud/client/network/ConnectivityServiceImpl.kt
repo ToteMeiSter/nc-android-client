@@ -16,6 +16,7 @@ import com.owncloud.android.lib.common.utils.Log_OC
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import org.apache.commons.httpclient.HttpStatus
@@ -24,6 +25,7 @@ import java.net.ConnectException
 import java.net.SocketTimeoutException
 import java.net.UnknownHostException
 import javax.net.ssl.SSLException
+import kotlin.time.Duration.Companion.seconds
 
 @Suppress("TooGenericExceptionCaught", "ReturnCount")
 class ConnectivityServiceImpl(
@@ -31,17 +33,22 @@ class ConnectivityServiceImpl(
     private val accountManager: UserAccountManager,
     private val clientFactory: ClientFactory,
     private val requestBuilder: GetRequestBuilder,
-    private val walledCheckCache: WalledCheckCache
+    private val walledCheckCache: WalledCheckCache,
+    private val scope: CoroutineScope = CoroutineScope(Dispatchers.IO)
 ) : ConnectivityService {
 
     companion object {
         private const val TAG = "ConnectivityServiceImpl"
         private const val CONNECTIVITY_CHECK_ROUTE = "/index.php/204"
+
+        val CAPABILITY_CHANGE_WINDOW = 15.seconds
     }
 
     // region private values
-    private val scope = CoroutineScope(Dispatchers.IO)
     private var notifyJob: Job? = null
+    private val capabilityWindowLock = Any()
+    private var capabilityWindowJob: Job? = null
+    private var hasDeferredCapabilityChange = false
     private val connectivityManager = context.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
     private val listeners = mutableSetOf<NetworkChangeListener>()
 
@@ -58,6 +65,10 @@ class ConnectivityServiceImpl(
         }
 
         override fun onCapabilitiesChanged(network: Network, networkCapabilities: NetworkCapabilities) {
+            if (!openCapabilityWindowOrDefer()) {
+                return
+            }
+
             Log_OC.d(TAG, "resolving network capabilities to compare")
             updateConnectivity()
         }
@@ -192,6 +203,35 @@ class ConnectivityServiceImpl(
     // endregion
 
     // region private methods
+    private fun openCapabilityWindowOrDefer(): Boolean = synchronized(capabilityWindowLock) {
+        if (capabilityWindowJob?.isActive == true) {
+            hasDeferredCapabilityChange = true
+            return@synchronized false
+        }
+
+        capabilityWindowJob = launchCapabilityWindow()
+        true
+    }
+
+    private fun launchCapabilityWindow(): Job = scope.launch {
+        delay(CAPABILITY_CHANGE_WINDOW)
+        closeCapabilityWindow()
+    }
+
+    private fun closeCapabilityWindow() {
+        val hasDeferred = synchronized(capabilityWindowLock) {
+            val deferred = hasDeferredCapabilityChange
+            hasDeferredCapabilityChange = false
+            capabilityWindowJob = if (deferred) launchCapabilityWindow() else null
+            deferred
+        }
+
+        if (hasDeferred) {
+            Log_OC.d(TAG, "applying capability change deferred by throttling")
+            updateConnectivity()
+        }
+    }
+
     private fun notifyListeners() {
         if (listeners.isEmpty()) {
             return
