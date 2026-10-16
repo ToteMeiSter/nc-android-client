@@ -338,7 +338,8 @@ class FileUploadWorker(
                 operation,
                 startIntent = intents.openUploadListIntent(operation),
                 currentUploadIndex = currentUploadIndex,
-                totalUploadSize = totalUploadSize
+                totalUploadSize = totalUploadSize,
+                albums = uploads.toAlbums(processedCount = index)
             )
 
             val result = withContext(Dispatchers.IO) {

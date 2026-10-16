@@ -31,7 +31,8 @@ class UploadNotificationManager(private val context: Context, viewThemeUtils: Vi
         operation: UploadFileOperation,
         startIntent: PendingIntent,
         currentUploadIndex: Int,
-        totalUploadSize: Int
+        totalUploadSize: Int,
+        albums: List<UploadAlbum> = emptyList()
     ) {
         currentOperationTitle = if (totalUploadSize > 1) {
             String.format(
@@ -52,10 +53,7 @@ class UploadNotificationManager(private val context: Context, viewThemeUtils: Vi
             setContentText(progressText)
             setOngoing(false)
             clearActions()
-            setStyle(
-                NotificationCompat.BigTextStyle()
-                    .bigText(context.getString(R.string.upload_notification_manager_content_intent_description))
-            )
+            setStyle(expandedStyle(albums, currentUploadIndex - 1, totalUploadSize))
             addAction(UploadBroadcastAction.PauseAndCancel(operation).pauseAction(context))
             addAction(UploadBroadcastAction.PauseAndCancel(operation).cancelAction(context))
             setContentIntent(startIntent)
@@ -65,6 +63,11 @@ class UploadNotificationManager(private val context: Context, viewThemeUtils: Vi
             showNotification()
         }
     }
+
+    private fun expandedStyle(albums: List<UploadAlbum>, uploadedTotal: Int, grandTotal: Int) =
+        NotificationCompat.InboxStyle().also { style ->
+            UploadNotificationLines(context).build(albums, uploadedTotal, grandTotal).forEach(style::addLine)
+        }
 
     @Suppress("MagicNumber")
     fun updateUploadProgress(percent: Int, currentOperation: UploadFileOperation?) {
