@@ -644,6 +644,13 @@
 
     <string name="upload_notification_manager_content_intent_description">You can remove or resume it from Uploads</string>
 
+    <plurals name="upload_notification_total">
+        <item quantity="one">%1$d of %2$d uploaded, %3$d file left</item>
+        <item quantity="other">%1$d of %2$d uploaded, %3$d files left</item>
+    </plurals>
+    <string name="upload_notification_album_line">%1$s → %2$s: %3$d/%4$d</string>
+    <string name="upload_notification_folder_line">%1$s: %2$d/%3$d</string>
+
     <string name="forbidden_permissions">You are not permitted %s</string>
     <string name="forbidden_permissions_rename">to rename this file</string>
     <string name="forbidden_permissions_delete">to delete this file</string>
