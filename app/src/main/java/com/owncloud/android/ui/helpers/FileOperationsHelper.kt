@@ -16,7 +16,6 @@ package com.owncloud.android.ui.helpers
 
 import android.app.Activity
 import android.content.ActivityNotFoundException
-import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
@@ -73,7 +72,6 @@ import com.owncloud.android.ui.events.FileLockEvent
 import com.owncloud.android.ui.events.SyncEventFinished
 import com.owncloud.android.utils.EncryptionUtils
 import com.owncloud.android.utils.FileStorageUtils
-import com.owncloud.android.utils.UriUtils
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import org.greenrobot.eventbus.EventBus
@@ -560,23 +558,6 @@ class FileOperationsHelper(
         SendFilesDialog.newInstance(files).show(transaction, TAG_SEND_SHARE_DIALOG)
     }
 
-    fun sendCachedImage(file: OCFile?, packageName: String, activityName: String) {
-        if (file == null) {
-            Log_OC.wtf(TAG, "Trying to send a NULL OCFile")
-            return
-        }
-
-        val context = MainApp.getAppContext()
-        val sendIntent = Intent(Intent.ACTION_SEND).apply {
-            type = file.mimeType
-            component = ComponentName(packageName, activityName)
-            putExtra(Intent.EXTRA_STREAM, imageCacheUri(context, file))
-            putExtra(Intent.ACTION_SEND, true)
-            flags = Intent.FLAG_GRANT_READ_URI_PERMISSION
-        }
-        fileActivity.startActivity(Intent.createChooser(sendIntent, context.getString(R.string.actionbar_send_file)))
-    }
-
     fun setPictureAs(file: OCFile?, view: View?) {
         if (file == null) {
             Log_OC.wtf(TAG, "Trying to send a NULL OCFile")
@@ -595,19 +576,12 @@ class FileOperationsHelper(
         }
     }
 
+    // "Set as wallpaper" sends the downloaded original; the menu item is hidden for files that are not on the
+    // device, so there is no thumbnail fallback here.
     private fun pictureUri(file: OCFile): Uri {
         val context = MainApp.getAppContext()
-        if (!file.isDown) {
-            return imageCacheUri(context, file)
-        }
-
         val authority = context.getString(R.string.file_provider_authority)
         return FileProvider.getUriForFile(context, authority, File(file.storagePath))
-    }
-
-    private fun imageCacheUri(context: Context, file: OCFile): Uri {
-        val authority = context.getString(R.string.image_cache_provider_authority)
-        return "${UriUtils.URI_CONTENT_SCHEME}$authority${file.remotePath}".toUri()
     }
     // endregion
 

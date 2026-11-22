@@ -124,7 +124,9 @@ class FileMenuFilter internal constructor(
     private fun getHiddenMediaActions() = buildList {
         val firstFile = selection.firstFile
 
-        if (!selection.isSingleImage || MimeTypeUtil.isSVG(firstFile)) add(R.id.action_set_as_wallpaper)
+        if (!selection.isSingleImage || MimeTypeUtil.isSVG(firstFile) || !selection.allDown) {
+            add(R.id.action_set_as_wallpaper)
+        }
         if (!selection.isSingleFile || !selection.isSingleMedia || selection.containsEncryptedFile) {
             add(R.id.action_stream_media)
         }

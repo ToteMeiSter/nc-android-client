@@ -10,6 +10,7 @@ import android.annotation.SuppressLint
 import android.content.Context
 import android.content.res.AssetFileDescriptor
 import android.database.Cursor
+import android.graphics.Bitmap
 import android.graphics.Point
 import android.os.Binder
 import android.os.CancellationSignal
@@ -22,6 +23,8 @@ import com.nextcloud.client.account.UserAccountManager
 import com.nextcloud.client.jobs.upload.FileUploadHelper
 import com.nextcloud.client.preferences.AppPreferences
 import com.nextcloud.client.utils.HashUtil
+import com.nextcloud.utils.extensions.getBigThumbnail
+import com.nextcloud.utils.extensions.getSmallThumbnail
 import com.nextcloud.utils.extensions.getSmallThumbnailKey
 import com.nextcloud.utils.extensions.showToast
 import com.owncloud.android.MainApp
@@ -43,6 +46,9 @@ import com.owncloud.android.providers.documentstorage.sync.FolderRefresher
 import com.owncloud.android.ui.activity.SettingsActivity
 import dagger.Lazy
 import dagger.android.AndroidInjection
+import java.io.ByteArrayOutputStream
+import java.io.File
+import java.io.FileOutputStream
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
@@ -181,9 +187,29 @@ class DocumentsStorageProvider : DocumentsProvider() {
                 ThumbnailsCacheManager.generateThumbnailFromOCFile(file, document.user, appContext)
             }
 
-            val descriptor = DiskLruImageCacheFileProvider.getParcelFileDescriptorForOCFile(file)
+            val descriptor = getThumbnailFileDescriptor(file)
             AssetFileDescriptor(descriptor, 0, file.fileLength)
         }
+    }
+
+    // Consumers of this document expect the image itself, not a file descriptor of the disk cache entry.
+    @Suppress("TooGenericExceptionCaught")
+    private fun getThumbnailFileDescriptor(ocFile: OCFile): ParcelFileDescriptor {
+        val thumbnail = ocFile.getBigThumbnail()
+            ?: ocFile.getSmallThumbnail()
+            ?: ThumbnailsCacheManager.mDefaultImg
+
+        val thumbnailFile = File(MainApp.getAppContext().cacheDir, ocFile.fileName)
+        try {
+            ByteArrayOutputStream().use { buffer ->
+                thumbnail.compress(Bitmap.CompressFormat.PNG, THUMBNAIL_PNG_QUALITY, buffer)
+                FileOutputStream(thumbnailFile).use { output -> output.write(buffer.toByteArray()) }
+            }
+        } catch (e: Exception) {
+            Log_OC.e(TAG, "Error writing thumbnail file: ${e.message}")
+        }
+
+        return ParcelFileDescriptor.open(thumbnailFile, ParcelFileDescriptor.MODE_READ_ONLY)
     }
 
     override fun renameDocument(documentId: String, displayName: String): String? {
@@ -281,6 +307,7 @@ class DocumentsStorageProvider : DocumentsProvider() {
 
     companion object {
         private val TAG = DocumentsStorageProvider::class.java.simpleName
+        private const val THUMBNAIL_PNG_QUALITY = 90
 
         const val DOCUMENTID_SEPARATOR = "/"
 
