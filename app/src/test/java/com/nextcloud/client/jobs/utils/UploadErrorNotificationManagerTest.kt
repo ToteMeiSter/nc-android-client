@@ -15,9 +15,15 @@ import androidx.core.app.NotificationCompat
 import com.nextcloud.client.account.User
 import com.nextcloud.client.jobs.autoUpload.AutoUploadWorker
 import com.nextcloud.client.jobs.notification.WorkerNotificationManager
+import com.nextcloud.client.notifications.AppWideNotificationManager
 import com.owncloud.android.lib.common.operations.RemoteOperationResult
 import com.owncloud.android.lib.common.operations.RemoteOperationResult.ResultCode
 import com.owncloud.android.operations.UploadFileOperation
+import io.mockk.every
+import io.mockk.just
+import io.mockk.mockkObject
+import io.mockk.runs
+import io.mockk.verify
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.StandardTestDispatcher
@@ -91,7 +97,7 @@ class UploadErrorNotificationManagerTest {
 
     @Test
     fun generalErrorIsShownUnderIdDifferentFromForegroundId() = runTest {
-        handle(ResultCode.QUOTA_EXCEEDED)
+        handle(ResultCode.MAINTENANCE_MODE)
         testScheduler.advanceUntilIdle()
 
         val id = argumentCaptor<Int>()
@@ -148,11 +154,24 @@ class UploadErrorNotificationManagerTest {
 
     @Test
     fun withoutKeepFlagGeneralErrorStillUsesWorkerId() = runTest {
-        handle(ResultCode.QUOTA_EXCEEDED, keep = false)
+        handle(ResultCode.MAINTENANCE_MODE, keep = false)
         testScheduler.advanceUntilIdle()
 
         verify(notificationManager).showNotification(any<Notification>())
         verify(notificationManager, never()).createNotificationBuilder()
+    }
+
+    @Test
+    fun quotaExceededGoesToAppWideNotification() = runTest {
+        mockkObject(AppWideNotificationManager)
+        every { AppWideNotificationManager.showQuotaExceededNotification(any()) } just runs
+
+        handle(ResultCode.QUOTA_EXCEEDED)
+        testScheduler.advanceUntilIdle()
+
+        verify { AppWideNotificationManager.showQuotaExceededNotification(context) }
+        verify(notificationManager, never()).showNotification(any<Notification>())
+        verify(notificationManager, never()).showNotification(any(), any<Notification>())
     }
 
     private companion object {

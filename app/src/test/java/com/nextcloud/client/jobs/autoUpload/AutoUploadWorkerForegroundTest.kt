@@ -275,7 +275,7 @@ class AutoUploadWorkerForegroundTest {
         every { uploadHelper.getUploadByPaths(any(), any(), any()) } returns null
         every { connectivityService.connectivity } returns Connectivity.CONNECTED_WIFI
         every { powerManagementService.battery } returns BatteryStatus()
-        mockkStatic(MainApp::class)
+        mockkObject(MainApp.Companion)
         every { MainApp.getAppContext() } returns mockk(relaxed = true)
         mockkObject(NextcloudDatabase.Companion)
         every { NextcloudDatabase.getInstance(any<Context>()) } returns mockk(relaxed = true)
