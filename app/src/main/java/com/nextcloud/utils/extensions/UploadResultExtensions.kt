@@ -20,7 +20,6 @@ fun UploadResult.isNonRetryable(): Boolean = when (this) {
     UploadResult.SAME_FILE_CONFLICT,
     UploadResult.LOCAL_STORAGE_NOT_COPIED,
     UploadResult.VIRUS_DETECTED,
-    UploadResult.QUOTA_EXCEEDED,
     UploadResult.PRIVILEGES_ERROR,
 
     // user's choice
@@ -31,6 +30,7 @@ fun UploadResult.isNonRetryable(): Boolean = when (this) {
     else -> false
 }
 
+@Suppress("CyclomaticComplexMethod")
 fun UploadResult.getFailedStatusText(context: Context): String = when (this) {
     UploadResult.CREDENTIAL_ERROR ->
         context.getString(R.string.uploads_view_upload_status_failed_credentials_error)

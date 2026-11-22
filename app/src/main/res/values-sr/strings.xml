@@ -286,7 +286,6 @@
     <string name="downloader_download_in_progress_ticker">Преузимам…</string>
     <string name="downloader_download_succeeded_content">%1$s преузето</string>
     <string name="downloader_download_succeeded_ticker">Преузето</string>
-    <string name="downloader_file_download_cancelled">Током преузимања, корисник је отказао преузимање неких фајлова</string>
     <string name="downloader_file_download_failed">Дошло је до грешке приликом преузимања фајлова</string>
     <string name="downloader_not_downloaded_yet">Још увек није преузето</string>
     <string name="downloader_unexpected_error">Дошло је до неочекиване грешке приликом преузимања фајлова</string>
@@ -323,7 +322,6 @@
     <string name="email_pick_failed">Није успело бирање и-мејл адресе.</string>
     <string name="encrypted">Постави као шифровано</string>
     <string name="end_to_end_encryption_certificate_unavailable">Серверски сертификат није могао да се преузме</string>
-    <string name="end_to_end_encryption_certificate_verification_failed">Није успело потврђивање јавног кључа</string>
     <string name="end_to_end_encryption_confirm_button">Подесите шифровање</string>
     <string name="end_to_end_encryption_decrypting">Дешифрујем…</string>
     <string name="end_to_end_encryption_dialog_close">Затвори</string>

@@ -27,12 +27,12 @@ import com.nextcloud.client.onboarding.WhatsNewActivity
 import com.nextcloud.client.widget.DashboardWidgetConfigurationActivity
 import com.nextcloud.client.widget.DashboardWidgetProvider
 import com.nextcloud.client.widget.DashboardWidgetService
-import com.nextcloud.ui.ChooseAccountDialogFragment
-import com.nextcloud.ui.ChooseStorageLocationDialogFragment
-import com.nextcloud.ui.SetOnlineStatusBottomSheet
-import com.nextcloud.ui.SetStatusMessageBottomSheet
 import com.nextcloud.ui.albumItemActions.AlbumItemActionsBottomSheet
 import com.nextcloud.ui.composeActivity.ComposeActivity
+import com.nextcloud.ui.dialog.account.ChooseAccountDialogFragment
+import com.nextcloud.ui.dialog.account.onlineStatus.SetOnlineStatusBottomSheet
+import com.nextcloud.ui.dialog.account.statusMessage.SetStatusMessageBottomSheet
+import com.nextcloud.ui.dialog.chooseStorage.ChooseStorageLocationDialogFragment
 import com.nextcloud.ui.fileInfo.FileInfoFragment
 import com.nextcloud.ui.fileactions.FileActionsBottomSheet
 import com.nextcloud.ui.tags.TagManagementBottomSheet
@@ -42,7 +42,8 @@ import com.owncloud.android.MainApp
 import com.owncloud.android.authentication.AuthenticatorActivity
 import com.owncloud.android.authentication.DeepLinkLoginActivity
 import com.owncloud.android.files.BootupBroadcastReceiver
-import com.owncloud.android.providers.DocumentsStorageProvider
+import com.owncloud.android.providers.DiskLruImageCacheFileProvider
+import com.owncloud.android.providers.documentstorage.DocumentsStorageProvider
 import com.owncloud.android.providers.FileContentProvider
 import com.owncloud.android.providers.UsersAndGroupsSearchProvider
 import com.owncloud.android.services.AccountManagerService
@@ -53,7 +54,7 @@ import com.owncloud.android.ui.activity.BaseActivity
 import com.owncloud.android.ui.activity.ConflictsResolveActivity
 import com.owncloud.android.ui.activity.ContactsPreferenceActivity
 import com.owncloud.android.ui.activity.CopyToClipboardActivity
-import com.owncloud.android.ui.activity.DrawerActivity
+import com.owncloud.android.ui.activity.drawer.DrawerActivity
 import com.owncloud.android.ui.activity.ErrorsWhileCopyingHandlerActivity
 import com.owncloud.android.ui.activity.ExternalSiteWebView
 import com.owncloud.android.ui.activity.FileActivity
@@ -71,13 +72,13 @@ import com.owncloud.android.ui.activity.RichDocumentsEditorWebView
 import com.owncloud.android.ui.activity.SettingsActivity
 import com.owncloud.android.ui.activity.ShareActivity
 import com.owncloud.android.ui.activity.SsoGrantPermissionActivity
-import com.owncloud.android.ui.activity.SyncedFoldersActivity
 import com.owncloud.android.ui.activity.TextEditorWebView
 import com.owncloud.android.ui.activity.ToolbarActivity
 import com.owncloud.android.ui.activity.UploadFilesActivity
 import com.owncloud.android.ui.activity.UserInfoActivity
 import com.owncloud.android.ui.dialog.AccountRemovalDialog
 import com.owncloud.android.ui.dialog.AppPassCodeDialog
+import com.owncloud.android.ui.dialog.AutoUploadPreferenceDialogFragment
 import com.owncloud.android.ui.dialog.ChooseRichDocumentsTemplateDialogFragment
 import com.owncloud.android.ui.dialog.ChooseTemplateDialogFragment
 import com.owncloud.android.ui.dialog.ConfirmationDialogFragment
@@ -97,7 +98,6 @@ import com.owncloud.android.ui.dialog.SortingOrderDialogFragment
 import com.owncloud.android.ui.dialog.SslUntrustedCertDialog
 import com.owncloud.android.ui.dialog.StoragePermissionDialogFragment
 import com.owncloud.android.ui.dialog.SyncFileNotEnoughSpaceDialogFragment
-import com.owncloud.android.ui.dialog.SyncedFolderPreferencesDialogFragment
 import com.owncloud.android.ui.dialog.TermsOfServiceDialog
 import com.owncloud.android.ui.dialog.ThemeSelectionDialog
 import com.owncloud.android.ui.dialog.conflict.ConflictsResolveDialog
@@ -124,16 +124,17 @@ import com.owncloud.android.ui.fragment.contactsbackup.BackupFragment
 import com.owncloud.android.ui.fragment.contactsbackup.BackupListFragment
 import com.owncloud.android.ui.fragment.localfilelist.LocalFileListFragment
 import com.owncloud.android.ui.fragment.notifications.NotificationsFragment
+import com.owncloud.android.ui.fragment.autoUpload.AutoUploadFragment
 import com.owncloud.android.ui.fragment.uploadList.UploadListFragment
 import com.owncloud.android.ui.navigation.NavigatorActivity
-import com.owncloud.android.ui.preview.FileDownloadFragment
-import com.owncloud.android.ui.preview.PreviewBitmapActivity
-import com.owncloud.android.ui.preview.PreviewImageActivity
-import com.owncloud.android.ui.preview.PreviewImageFragment
-import com.owncloud.android.ui.preview.PreviewPlaybackFragment
-import com.owncloud.android.ui.preview.PreviewTextFileFragment
-import com.owncloud.android.ui.preview.PreviewTextFragment
-import com.owncloud.android.ui.preview.PreviewTextStringFragment
+import com.owncloud.android.ui.preview.media.PreviewMediaDownloadFragment
+import com.owncloud.android.ui.preview.pdf.PreviewBitmapActivity
+import com.owncloud.android.ui.preview.media.PreviewMediaActivity
+import com.owncloud.android.ui.preview.media.PreviewMediaFragment
+import com.owncloud.android.ui.preview.media.PreviewPlaybackFragment
+import com.owncloud.android.ui.preview.text.PreviewTextFileFragment
+import com.owncloud.android.ui.preview.text.PreviewTextFragment
+import com.owncloud.android.ui.preview.text.PreviewTextStringFragment
 import com.owncloud.android.ui.preview.pdf.PreviewPdfFragment
 import com.owncloud.android.ui.trashbin.TrashbinFragment
 import dagger.Module
@@ -143,13 +144,15 @@ import dagger.android.ContributesAndroidInjector
  * Register classes that require dependency injection. This class is used by Dagger compiler only.
  */
 @Module
-@Suppress("TooManyFunctions")
 internal interface ComponentsModule {
     @ContributesAndroidInjector
     fun trashbinFragment(): TrashbinFragment
 
     @ContributesAndroidInjector
     fun uploadListFragment(): UploadListFragment
+
+    @ContributesAndroidInjector
+    fun autoUploadFragment(): AutoUploadFragment
 
     @ContributesAndroidInjector
     fun activitiesFragment(): ActivitiesFragment
@@ -212,7 +215,7 @@ internal interface ComponentsModule {
     fun passCodeActivity(): PassCodeActivity
 
     @ContributesAndroidInjector
-    fun previewImageActivity(): PreviewImageActivity
+    fun previewImageActivity(): PreviewMediaActivity
 
     @ContributesAndroidInjector
     fun receiveExternalFilesActivity(): ReceiveExternalFilesActivity
@@ -228,9 +231,6 @@ internal interface ComponentsModule {
 
     @ContributesAndroidInjector
     fun ssoGrantPermissionActivity(): SsoGrantPermissionActivity
-
-    @ContributesAndroidInjector
-    fun syncedFoldersActivity(): SyncedFoldersActivity
 
     @ContributesAndroidInjector
     fun trashbinFileActionsBottomSheet(): TrashbinFileActionsBottomSheet
@@ -287,7 +287,7 @@ internal interface ComponentsModule {
     fun contactsBackupFragment(): BackupFragment
 
     @ContributesAndroidInjector
-    fun previewImageFragment(): PreviewImageFragment
+    fun previewImageFragment(): PreviewMediaFragment
 
     @ContributesAndroidInjector
     fun chooseContactListFragment(): BackupListFragment
@@ -333,6 +333,9 @@ internal interface ComponentsModule {
 
     @ContributesAndroidInjector
     fun usersAndGroupsSearchProvider(): UsersAndGroupsSearchProvider
+
+    @ContributesAndroidInjector
+    fun diskLruImageCacheFileProvider(): DiskLruImageCacheFileProvider
 
     @ContributesAndroidInjector
     fun documentsStorageProvider(): DocumentsStorageProvider
@@ -383,7 +386,7 @@ internal interface ComponentsModule {
     fun fileActivity(): FileActivity
 
     @ContributesAndroidInjector
-    fun fileDownloadFragment(): FileDownloadFragment
+    fun fileDownloadFragment(): PreviewMediaDownloadFragment
 
     @ContributesAndroidInjector
     fun loadingDialog(): LoadingDialog
@@ -425,7 +428,7 @@ internal interface ComponentsModule {
     fun sharePasswordDialogFragment(): SharePasswordDialogFragment
 
     @ContributesAndroidInjector
-    fun syncedFolderPreferencesDialogFragment(): SyncedFolderPreferencesDialogFragment
+    fun autoUploadPreferenceDialogFragment(): AutoUploadPreferenceDialogFragment
 
     @ContributesAndroidInjector
     fun toolbarActivity(): ToolbarActivity

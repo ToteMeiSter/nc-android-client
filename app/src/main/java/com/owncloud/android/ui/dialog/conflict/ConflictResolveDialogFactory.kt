@@ -22,10 +22,9 @@ import com.owncloud.android.ui.dialog.conflict.model.ConflictDialogData
 import com.owncloud.android.ui.dialog.conflict.model.ConflictDialogType
 import com.owncloud.android.ui.dialog.conflict.model.ConflictFileData
 import java.io.File
+import com.nextcloud.utils.AppConstants.MILLIS_PER_SECOND
 
 object ConflictResolveDialogFactory {
-    private const val SECONDS_TO_MILLIS = 1000L
-
     fun forOffline(
         context: Context,
         leftFile: OfflineOperationEntity,
@@ -40,6 +39,11 @@ object ConflictResolveDialogFactory {
             }
 
         val isFolderConflict = leftFile.type is OfflineOperationType.CreateFolder
+        val serverFileTitleId = if (isFolderConflict) {
+            R.string.prefs_synced_folders_remote_path_title
+        } else {
+            R.string.conflict_server_file
+        }
 
         val data = ConflictDialogData(
             headline = context.getString(
@@ -60,11 +64,11 @@ object ConflictResolveDialogFactory {
                 titleId = R.string.conflict_local_file,
                 timestamp = (
                     offlineCreatedLocalFile?.lastModified()
-                        ?: leftFile.createdAt?.times(SECONDS_TO_MILLIS) ?: 0L
+                        ?: leftFile.createdAt?.times(MILLIS_PER_SECOND) ?: 0L
                     ),
                 fileLength = (offlineCreatedLocalFile?.length() ?: 0L)
             ),
-            serverFile = context.conflictFileData(R.string.prefs_synced_folders_remote_path_title, rightFile)
+            serverFile = context.conflictFileData(serverFileTitleId, rightFile)
         )
 
         return createDialog(ConflictDialogType.Offline(data)) {

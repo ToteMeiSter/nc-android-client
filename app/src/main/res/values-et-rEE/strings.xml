@@ -115,7 +115,7 @@
     <string name="auth_ssl_general_error_title">SSL-i valmendamine ei õnnestunud</string>
     <string name="auth_ssl_unverified_server_title">SSL serveri identiteeti ei suudetud tuvastada</string>
     <string name="auth_testing_connection">Ühenduse testimine</string>
-    <string name="auth_timeout_title">Serveri vastus võttis liiga kaua aega</string>
+    <string name="auth_timeout_title">Serveril kulus vastamiseks liiga kaua aega</string>
     <string name="auth_unauthorized">Vale kasutajanimi või salasõna</string>
     <string name="auth_unknown_error_exception_title">Tundmatu viga: %1$s</string>
     <string name="auth_unknown_error_http_title">Tekkis tundmatu HTTP viga!</string>
@@ -135,7 +135,7 @@
     <string name="auto_upload_battery_saver_reason">Akukasutuse optimeerimine on aktiivne ja see võib üleslaadimisi peatada.</string>
     <string name="auto_upload_delete_dialog_description">Järgnevaga eemaldad kausta ja automaatse üleslaadimise seadistused. Kõik lõpetamata üleslaadimised katkestatakse.</string>
     <string name="auto_upload_delete_dialog_title">Kas kustutad automaatse üleslaadimise kausta?</string>
-    <string name="auto_upload_file_behaviour_kept_in_folder">säilitatud lugemisõigustega algkaustas</string>
+    <string name="auto_upload_file_behaviour_kept_in_folder">kuna ta on lugemisõigustega, siis on säilitatud algkaustas</string>
     <string name="auto_upload_low_battery_warning_info">Aku on üsna tühi, üleslaadimine võib kesta kauem</string>
     <string name="auto_upload_on_wifi">Laadi üles ainult mahupiiranguta WiFi võrgus</string>
     <string name="auto_upload_path">/AutoUpload</string>
@@ -343,6 +343,7 @@
     <string name="download_download_invalid_local_file_name">Vigane failinimi kohaliku faili jaoks</string>
     <string name="download_latest_dev_version">Laadi alla viimane arendusversioon</string>
     <string name="download_limit">Allalaadimiste piirang</string>
+    <string name="downloader_download_canceled">Allalaadimine on katkestatud</string>
     <string name="downloader_download_failed_content">Ei saanud alla laadida: %1$s</string>
     <string name="downloader_download_failed_credentials_error">Allalaadimine ei õnnestunud, palun logi uuesti sisse</string>
     <string name="downloader_download_failed_ticker">Allalaadimine ei õnnestunud</string>
@@ -351,7 +352,6 @@
     <string name="downloader_download_in_progress_ticker">Allalaadimine…</string>
     <string name="downloader_download_succeeded_content">%1$s alla laaditud</string>
     <string name="downloader_download_succeeded_ticker">Alla laaditud</string>
-    <string name="downloader_file_download_cancelled">Kasutaja katkestas mõnede failide allalaadimise</string>
     <string name="downloader_file_download_failed">Failide allalaadimisel tekkis viga</string>
     <string name="downloader_not_downloaded_yet">Allalaadimata</string>
     <string name="downloader_unexpected_error">Failide allalaadimisel tekkis ootamatu viga</string>
@@ -397,11 +397,9 @@
     <string name="encryption_encrypt_unavailable">Selle kausta krüptimine pole võimalik. Läbiv krüptimine on selles serveris seadistamata.</string>
     <string name="encryption_key_checking_keys">Kontrollin võtmeid…</string>
     <string name="encryption_key_handle_folder_read_only_description">Selle kasutajakonto krüptovõtmed on eemaldatud või asendatud ja seega antud kausta sisu enam ei saa dekrüptida.\n\nNüüdsest on see kaust vaid loetavas olekus. Kasutamaks uuesti kaustade krüptimist, tee kausta sisust varukoopia ning seadista uued krüptovõtmed.</string>
-    <string name="encryption_key_handle_key_keys_only_on_device_description">Sellesse nutiseadmesse salvestatud krüptovõti pole enam kehtiv. Võtmed on tühistatud serveri poolelt.\n\nEemalda krüptimine kohalikest seadistustest ja loo uus krüptokaust.</string>
-    <string name="encryption_key_handle_key_keys_only_on_device_outdated_description">Sellesse nutiseadmesse salvestatud krüptovõti pole enam kehtiv. Võtmed on tühistatud serveri poolelt.\n\nTee varasemalt krüptitud kausta sisust varukoopia.\n\nEemalda krüptimine kohalikest seadistustest ja loo uus krüptokaust.</string>
     <string name="encryption_key_handle_key_removed_title">Krüptovõtmed on muutunud</string>
+    <string name="encryption_key_handle_keys_changed_on_server_description">Serveris asuvad krüptovõtmed kas eemaldati või asendati ja seega krüptitud kaustad on selles seadmes vaid lugemisõigustes.\n\nKui tahad jätkata läbiva krüptimise kasutamist, siis varunda oma krüptitud failid ja eemalda kohalikest seadistustest krüptimine ning seadista see uuesti.</string>
     <string name="encryption_key_handle_no_keys_description">Kausta krüptovõtmeid pole enam ei selles nutiseadmes ega serveris ja seega seda kausta ei saa enam avada.</string>
-    <string name="encryption_key_handle_setup_new_key_before_encrypting_description">Selle kasutajakonto krüptovõtmed on kas eemaldatud või asendatud.\n\nEnne kausta krüptimist seadista oma uus krüptovõti.</string>
     <string name="encryption_new_folder_check_failed">Sinu krüptovõtmete kontrollimine ei õnnestunud. Proovi kausta uuesti lisada.</string>
     <string name="encryption_new_folder_no_network">Server pole leitav. Proovi kausta hiljem uuesti lisada.</string>
     <string name="encryption_new_folder_unavailable">Krüptitud kaustade loomine pole võimalik. Läbiv krüptimine on selles serveris seadistamata.</string>
@@ -410,8 +408,8 @@
     <string name="encryption_open_no_network">Server pole leitav. Proovi kausta hiljem uuesti avada.</string>
     <string name="encryption_open_unavailable">Selle kausta avamine pole võimalik. Läbiv krüptimine on selles serveris seadistamata.</string>
     <string name="end_to_end_encryption_certificate_unavailable">Serveri sertifikaadi laadimine ei õnnestu</string>
-    <string name="end_to_end_encryption_certificate_verification_failed">Avaliku võtme verifitseerimine ei õnnestu</string>
     <string name="end_to_end_encryption_confirm_button">Võta krüptimine kasutusele</string>
+    <string name="end_to_end_encryption_could_not_verify_certificate">Krüptimise sertifikaadi õigsuse kontrollimine ei õnnestunud</string>
     <string name="end_to_end_encryption_decrypting">Dekrüptin…</string>
     <string name="end_to_end_encryption_dialog_close">Sulge</string>
     <string name="end_to_end_encryption_enter_passphrase_to_access_files">Ligipääsuks oma failidele sisesta oma salafraas</string>
@@ -610,6 +608,7 @@
     <string name="foreign_files_remote_text">Kaughallatav: %1$s</string>
     <string name="forward">Edasi</string>
     <string name="fourHours">4 tundi</string>
+    <string name="gallery_unsupported_file">Failitüüp pole toetatud</string>
     <string name="governance_file_retention_label">Failide säilitamine</string>
     <string name="governance_legal_hold_label">Säilitamine juriidiliste nõuete alusel</string>
     <string name="governance_no_label">Puudub</string>
@@ -681,7 +680,7 @@
     <string name="logs_status_not_filtered">Logid: %1$d kB, filtrit pole</string>
     <string name="logs_title">Logid</string>
     <string name="maintenance_mode">Server on hooldusrežiimis</string>
-    <string name="manage_space_auto_upload_clear_data">Kustuta automaatselt üleslaaditud failid kohalikust seadmest</string>
+    <string name="manage_space_auto_upload_clear_data">Kustuta automaatselt kohalikust seadmest üleslaaditud failid</string>
     <string name="manage_space_auto_upload_description">Kõik automaatsete üleslaadimiste kaustadest serverisse üleslaaditud failid kustutatakse andmeruumi vabastamise nimel.\n\nSelle toimingu jaoks võib kuluda aega.</string>
     <string name="manage_space_auto_upload_title">Kustuta automaatselt üleslaaditud failid kohalikust seadmest</string>
     <string name="manage_space_clear_data">Kustuta andmed</string>
@@ -691,10 +690,10 @@
     <string name="media_picker_toolbar_title">Vali meediumifailid</string>
     <string name="menu_item_sort_by_date_newest_first">Uuemad esimesena</string>
     <string name="menu_item_sort_by_date_oldest_first">Vanemad esimesena</string>
-    <string name="menu_item_sort_by_name_a_z">A - Z</string>
-    <string name="menu_item_sort_by_name_z_a">Z - A</string>
+    <string name="menu_item_sort_by_name_a_z">A - Y</string>
+    <string name="menu_item_sort_by_name_z_a">Y - A</string>
     <string name="menu_item_sort_by_size_biggest_first">Suuremad esimesena</string>
-    <string name="menu_item_sort_by_size_smallest_first">Väiksemad esimesenaa</string>
+    <string name="menu_item_sort_by_size_smallest_first">Väiksemad esimesena</string>
     <string name="more">Veel</string>
     <string name="more_documents">Veel dokumente</string>
     <string name="move_file_error">Selle faili või kausta teisaldamisel tekkis viga</string>
@@ -785,6 +784,7 @@
     <string name="pin_shortcut_label">Ava %1$s </string>
     <string name="player_audio_title_with_artist">%1$s • %2$s</string>
     <string name="player_control_view_next_button_content_description">Edasikerimise nupp</string>
+    <string name="player_control_view_play_mode_button_content_description">Esitusrežiimi nupp</string>
     <string name="player_control_view_play_pause_button_content_description">Esitamise/peatamise nupp</string>
     <string name="player_control_view_previous_button_content_description">Tagasikerimise nupp</string>
     <string name="player_control_view_random_button_content_description">Juhusliku esituse nupp</string>
@@ -982,6 +982,7 @@
     <string name="share_link_file_no_exist">Jagamine ei õnnestu. Palun kontrolli, kas fail päriselt on olemas.</string>
     <string name="share_link_forbidden_permissions">faili jagamiseks</string>
     <string name="share_link_optional_password_title">Kui soovid, siis lisa salasõna</string>
+    <string name="share_link_password_rejected">See salasõna ei vasta salasõnadele kehtivatele reeglitele. Palun muuda salasõna pikemaks ja/või keerukamaks.</string>
     <string name="share_link_password_title">Sisesta salasõna</string>
     <string name="share_link_with_label">Jagamise link (%1$s)</string>
     <string name="share_no_expiration_date_label">Määra aegumise kuupäev</string>
@@ -1019,7 +1020,7 @@
     <string name="sign_tos_failed">Palun tutvu kasutustingimustega!</string>
     <string name="signup_with_provider">Või liitu teenusepakkujaga</string>
     <string name="single_sign_on_request_token" formatted="true">Kas lubad „%1$s“ teenusel ligipääsu sinu Nextcloudi kasutajakontole „%2$s“?</string>
-    <string name="sort_by">Sorteeri</string>
+    <string name="sort_by">Järjesta</string>
     <string name="sort_favorites_first">Järjesta lemmikud esimesena</string>
     <string name="sort_folders_before_files">Järjesta kaustad enne faile</string>
     <string name="ssl_validator_btn_details_hide">Peida</string>
@@ -1171,6 +1172,7 @@
     <string name="upload_cannot_create_file">Kohalikku faili ei õnnestunud luua</string>
     <string name="upload_chooser_title">Laadi üles…</string>
     <string name="upload_content_from_other_apps">Laadi üles sisu teistest rakendustest</string>
+    <string name="upload_direct_camera_not_found">Ühtegi kaamerat ei leidu</string>
     <string name="upload_direct_camera_photo">Foto</string>
     <string name="upload_direct_camera_promt">Kas sa soovid pildistada või filmida?</string>
     <string name="upload_direct_camera_upload">Laadi üles kaamerast</string>
@@ -1204,6 +1206,7 @@
     <string name="upload_old_android">Krüptimine on võimalik vaid &gt;= Android 5.0 puhul</string>
     <string name="upload_query_move_foreign_files">Piisava ruumi puudumisel pole võimalik kopeerida valitud faile „%1$s“ kausta. Kas pigem tahaksid nad sinna teisaldada?</string>
     <string name="upload_quota_exceeded">Andmeruumi kvoot on ületatud</string>
+    <string name="upload_quota_exceeded_notification_description">Sinu andmeruumi kvoot on täis ja seega üleslaadimine lõppes. Vabasta andmeruumi või küsi peakasutajalt suuremat kvooti ja siis käivita Üleslaadimiste kaustas leiduvad peatunud üleslaadimised.</string>
     <string name="upload_scan_doc_upload">Skaneeri dokumenti kaameraga</string>
     <string name="upload_sync_conflict_check">Viimasest üleslaadimisest võib olla failikonflikte. Kontrollimiseks klõpsa.</string>
     <string name="upload_sync_conflict_check_error">Failide üleslaadimiskonfliktide kontrollimine ei õnnestunud. Palun proovi uuesti.</string>

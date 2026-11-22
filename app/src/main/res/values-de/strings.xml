@@ -343,6 +343,7 @@
     <string name="download_download_invalid_local_file_name">Ungültiger Dateiname für lokale Datei</string>
     <string name="download_latest_dev_version">Die neueste Entwicklerversion herunterladen</string>
     <string name="download_limit">Download-Limit</string>
+    <string name="downloader_download_canceled">Herunterladen abgebrochen</string>
     <string name="downloader_download_failed_content">Konnte %1$s nicht herunterladen</string>
     <string name="downloader_download_failed_credentials_error">Herunterladen fehlgeschlagen, erneute Anmeldung erforderlich</string>
     <string name="downloader_download_failed_ticker">Herunterladen fehlgeschlagen</string>
@@ -351,7 +352,6 @@
     <string name="downloader_download_in_progress_ticker">Lade herunter …</string>
     <string name="downloader_download_succeeded_content">%1$s heruntergeladen</string>
     <string name="downloader_download_succeeded_ticker">Heruntergeladen</string>
-    <string name="downloader_file_download_cancelled">Bestimmte Dateien wurden während des Downloads durch den Benutzer abgebrochen</string>
     <string name="downloader_file_download_failed">Es ist ein Fehler beim Herunterladen der Dateien aufgetreten.</string>
     <string name="downloader_not_downloaded_yet">Noch nicht Heruntergeladen</string>
     <string name="downloader_unexpected_error">Es ist ein unerwarteter Fehler beim Herunterladen der Dateien aufgetreten</string>
@@ -397,11 +397,9 @@
     <string name="encryption_encrypt_unavailable">Dieser Ordner kann nicht verschlüsselt werden. Auf diesem Server ist keine Ende-zu-Ende-Verschlüsselung eingerichtet.</string>
     <string name="encryption_key_checking_keys">Prüfe Schlüssel …</string>
     <string name="encryption_key_handle_folder_read_only_description">Die Verschlüsselungsschlüssel dieses Kontos wurden entfernt oder ersetzt, daher kann der Inhalt dieses Ordners nicht mehr entschlüsselt werden.\n\nDer Ordner ist ab sofort schreibgeschützt. Um verschlüsselte Ordner wieder verwenden zu können, sichern Sie diesen Ordner und richten Sie Ihren neuen Verschlüsselungsschlüssel in den Einstellungen ein.</string>
-    <string name="encryption_key_handle_key_keys_only_on_device_description">Der auf diesem Gerät gespeicherte Verschlüsselungsschlüssel ist ungültig. Die Schlüssel wurden vom Server widerrufen. \n\nDie lokale Verschlüsselung in den Einstellungen entfernen, um einen neuen Verschlüsselungsordner zu erstellen.</string>
-    <string name="encryption_key_handle_key_keys_only_on_device_outdated_description">Der auf diesem Gerät gespeicherte Verschlüsselungsschlüssel ist ungültig. Die Schlüssel wurden vom Server widerrufen. \n\nDen zuvor erstellten verschlüsselten Ordner sichern. \n\nAnschließend die lokale Verschlüsselung in den Einstellungen deaktivieren, um einen neuen verschlüsselten Ordner zu erstellen.</string>
     <string name="encryption_key_handle_key_removed_title">Die Verschlüsselungsschlüssel wurden geändert</string>
+    <string name="encryption_key_handle_keys_changed_on_server_description">Die Verschlüsselungsschlüssel auf dem Server wurden entfernt oder ersetzt, sodass verschlüsselte Ordner auf diesem Gerät schreibgeschützt sind.\n\nUm weiterhin eine Ende-zu-Ende-Verschlüsselung zu verwenden, sie verschlüsselten Dateiensichern, die Verschlüsselung lokal in den Einstellungen entfernen und erneut einrichten.</string>
     <string name="encryption_key_handle_no_keys_description">Dieser Ordner kann nicht geöffnet werden, da seine Verschlüsselungsschlüssel weder auf diesem Gerät noch auf dem Server vorhanden sind.</string>
-    <string name="encryption_key_handle_setup_new_key_before_encrypting_description">Die Verschlüsselungsschlüssel dieses Kontos wurden entfernt oder ersetzt.\n\nRichten Sie Ihren neuen Verschlüsselungsschlüssel in den Einstellungen ein, bevor Sie einen Ordner verschlüsseln.</string>
     <string name="encryption_new_folder_check_failed">Die Überprüfung Ihrer Verschlüsselungsschlüssel ist fehlgeschlagen. Bitte erstellen Sie den Ordner erneut.</string>
     <string name="encryption_new_folder_no_network">Der Server ist nicht erreichbar. Später erneut versuchen, den Ordner zu erstellen.</string>
     <string name="encryption_new_folder_unavailable">Es können keine verschlüsselten Ordner erstellt werden. Auf diesem Server ist keine Ende-zu-Ende-Verschlüsselung eingerichtet.</string>
@@ -410,8 +408,8 @@
     <string name="encryption_open_no_network">Der Server ist nicht erreichbar. Später erneut versuchen, den Ordner zu öffnen.</string>
     <string name="encryption_open_unavailable">Dieser Ordner kann nicht geöffnet werden. Auf diesem Server ist keine Ende-zu-Ende-Verschlüsselung eingerichtet.</string>
     <string name="end_to_end_encryption_certificate_unavailable">Serverzertifikat kann nicht abgerufen werden</string>
-    <string name="end_to_end_encryption_certificate_verification_failed">Der öffentliche Schlüssel konnte nicht verifiziert werden</string>
     <string name="end_to_end_encryption_confirm_button">Verschlüsselung einrichten</string>
+    <string name="end_to_end_encryption_could_not_verify_certificate">Das Verschlüsselungszertifikat konnte nicht überprüft werden</string>
     <string name="end_to_end_encryption_decrypting">Entschlüssele …</string>
     <string name="end_to_end_encryption_dialog_close">Schließen</string>
     <string name="end_to_end_encryption_enter_passphrase_to_access_files">Geben Sie Ihre Passphrase ein, um auf Ihre Dateien zuzugreifen</string>
@@ -472,7 +470,7 @@
     <string name="etm_transfer">Dateiübertragung</string>
     <string name="etm_transfer_enqueue_test_download">Test-Download in die Warteschlange stellen</string>
     <string name="etm_transfer_enqueue_test_upload">Test-Upload in die Warteschlange stellen </string>
-    <string name="etm_transfer_remote_path">Entfernter Pfad</string>
+    <string name="etm_transfer_remote_path">Externer Pfad</string>
     <string name="etm_transfer_type">Übertragen</string>
     <string name="etm_transfer_type_download">Herunterladen</string>
     <string name="etm_transfer_type_upload">Hochladen</string>
@@ -610,6 +608,7 @@
     <string name="foreign_files_remote_text">Remote: %1$s</string>
     <string name="forward">Weiterleiten</string>
     <string name="fourHours">4 Stunden</string>
+    <string name="gallery_unsupported_file">Nicht unterstütztes Datei-Format</string>
     <string name="governance_file_retention_label">Dateiaufbewahrung</string>
     <string name="governance_legal_hold_label">Aufbewahrungspflicht:</string>
     <string name="governance_no_label">Keine</string>
@@ -785,6 +784,7 @@
     <string name="pin_shortcut_label">%1$s öffnen</string>
     <string name="player_audio_title_with_artist">%1$s • %2$s</string>
     <string name="player_control_view_next_button_content_description">Nächste Schaltfläche</string>
+    <string name="player_control_view_play_mode_button_content_description">Wiedergabemodus- Schaltfläche</string>
     <string name="player_control_view_play_pause_button_content_description">Wiedergabe-/Pause Schaltfläche</string>
     <string name="player_control_view_previous_button_content_description">Vorherige Schaltfläche</string>
     <string name="player_control_view_random_button_content_description">Zufällige Schaltfläche</string>
@@ -887,7 +887,7 @@
     <string name="recommended_files_title">Empfohlene Dateien</string>
     <string name="refresh_content">Inhalt aktualisieren</string>
     <string name="reload">Neu laden</string>
-    <string name="remote">(entfernt)</string>
+    <string name="remote">(extern)</string>
     <string name="remote_file_fetch_failed">Datei nicht gefunden!</string>
     <string name="remove">Entfernen</string>
     <string name="remove_e2e">Sie können die Ende-zu-Ende-Verschlüsselung lokal auf diesem Client entfernen</string>
@@ -982,6 +982,7 @@
     <string name="share_link_file_no_exist">Teilen nicht möglich. Bitte prüfen Sie, ob die Datei existiert.</string>
     <string name="share_link_forbidden_permissions">diese Datei zu teilen</string>
     <string name="share_link_optional_password_title">Passwort eingeben (optional)</string>
+    <string name="share_link_password_rejected">Das Passwort erfüllt nicht die Passwortanforderungen. Mit einem längeren oder komplexeren Passwort versuchen.</string>
     <string name="share_link_password_title">Passwort eingeben</string>
     <string name="share_link_with_label">Teile Link (%1$s)</string>
     <string name="share_no_expiration_date_label">Ablaufdatum setzen</string>
@@ -1171,6 +1172,7 @@
     <string name="upload_cannot_create_file">Datei kann lokal nicht erstellt werden</string>
     <string name="upload_chooser_title">Dateien hochladen von …</string>
     <string name="upload_content_from_other_apps">Inhalt anderer Apps hochladen</string>
+    <string name="upload_direct_camera_not_found">Keine Kamera gefunden</string>
     <string name="upload_direct_camera_photo">Foto</string>
     <string name="upload_direct_camera_promt">Möchten Sie ein Foto oder ein Video aufnehmen?</string>
     <string name="upload_direct_camera_upload">Von Kamera hochladen</string>
@@ -1204,6 +1206,7 @@
     <string name="upload_old_android">Verschlüsselung ist nur möglich mit &gt;= Android 5.0</string>
     <string name="upload_query_move_foreign_files">Es steht nicht genügend Speicherplatz zur Verfügung, um die ausgewählten Dateien in das Verzeichnis %1$s zu kopieren. Sollen diese stattdessen verschoben werden?</string>
     <string name="upload_quota_exceeded">Speicherkontingent überschritten</string>
+    <string name="upload_quota_exceeded_notification_description">Ihr Speicherplatz ist voll, daher wurde das Hochladenangehalten. Speicherplatz freimachen oder die Administration um mehr Speicherplatz bitten. Anschließend versuchen, die fehlgeschlagenen Uploads über \"Uploads\" erneut durchzuführen.</string>
     <string name="upload_scan_doc_upload">Dokument von der Kamera scannen</string>
     <string name="upload_sync_conflict_check">Möglicherweise liegt ein Konflikt bezüglich des letzten Uploads vor. Bitte Tippen, um zu überprüfen.</string>
     <string name="upload_sync_conflict_check_error">Es konnte nicht auf Hochlade-Konflikte überprüft werden. Bitte erneut versuchen.</string>
@@ -1377,7 +1380,7 @@
         <item quantity="other">%1$d Elemente</item>
     </plurals>
     <plurals name="synced_folders_show_hidden_folders">
-        <item quantity="one">Zeige %1$dversteckten Ordner</item>
+        <item quantity="one">Zeige %1$d versteckten Ordner</item>
         <item quantity="other">Zeige %1$d versteckte Ordner</item>
     </plurals>
     <plurals name="items_selected_count">

@@ -15,9 +15,9 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.nextcloud.client.account.CurrentAccountProvider
 import com.nextcloud.client.logger.Logger
-import com.nextcloud.utils.TimeConstants
+import com.nextcloud.utils.AppConstants
 import com.owncloud.android.datamodel.OCFile
-import com.owncloud.android.files.FileMenuFilter
+import com.owncloud.android.files.FileMenuFilterFactory
 import com.owncloud.android.lib.resources.files.model.FileLockType
 import com.owncloud.android.ui.activity.ComponentsGetter
 import kotlinx.coroutines.Dispatchers
@@ -26,7 +26,7 @@ import javax.inject.Inject
 
 class FileActionsViewModel @Inject constructor(
     private val currentAccountProvider: CurrentAccountProvider,
-    private val filterFactory: FileMenuFilter.Factory,
+    private val filterFactory: FileMenuFilterFactory,
     private val logger: Logger
 ) : ViewModel() {
 
@@ -132,7 +132,7 @@ class FileActionsViewModel @Inject constructor(
     private fun getLockedUntil(file: OCFile): Long? = if (file.lockTimestamp == 0L || file.lockTimeout == 0L) {
         null
     } else {
-        (file.lockTimestamp + file.lockTimeout) * TimeConstants.MILLIS_PER_SECOND
+        (file.lockTimestamp + file.lockTimeout) * AppConstants.MILLIS_PER_SECOND
     }
 
     fun onClick(action: FileAction) {

@@ -23,7 +23,6 @@ import androidx.test.espresso.matcher.ViewMatchers.isRoot
 import androidx.test.espresso.matcher.ViewMatchers.withId
 import androidx.test.espresso.matcher.ViewMatchers.withText
 import com.nextcloud.test.Flaky
-import com.nextcloud.test.GrantStoragePermissionRule.Companion.grant
 import com.nextcloud.test.TestActivity
 import com.owncloud.android.AbstractIT
 import com.owncloud.android.R
@@ -40,15 +39,10 @@ import org.hamcrest.Matchers.not
 import org.junit.After
 import org.junit.Assert
 import org.junit.Before
-import org.junit.Rule
 import org.junit.Test
-import org.junit.rules.TestRule
 
 class OCFileListFragmentStaticServerIT : AbstractIT() {
     private val testClassName = "com.owncloud.android.ui.fragment.OCFileListFragmentStaticServerIT"
-
-    @get:Rule
-    var storagePermissionRule: TestRule = grant()
 
     @Before
     fun initIntentRecording() {
@@ -246,7 +240,7 @@ class OCFileListFragmentStaticServerIT : AbstractIT() {
                 sut.supportFragmentManager.executePendingTransactions()
                 val root = sut.storageManager.getFileByEncryptedRemotePath("/")
                 fragment.listDirectory(root, false)
-                fragment.adapter.setShowShareAvatar(true)
+                requireNotNull(fragment.adapter).setShowShareAvatar(true)
             }
 
             val screenShotName = createName(testClassName + "_" + "showSharedFiles", "")
@@ -334,7 +328,7 @@ class OCFileListFragmentStaticServerIT : AbstractIT() {
                 sut.supportFragmentManager.executePendingTransactions()
                 val root = sut.storageManager.getFileByEncryptedRemotePath("/")
                 fragment.listDirectory(root, false)
-                fragment.adapter.setShowShareAvatar(true)
+                requireNotNull(fragment.adapter).setShowShareAvatar(true)
             }
 
             val screenShotName = createName(testClassName + "_" + "showFolderTypes", "")
@@ -399,27 +393,28 @@ class OCFileListFragmentStaticServerIT : AbstractIT() {
             }
 
             val testFolder: OCFile = activity!!.storageManager.getFileByEncryptedRemotePath("/test/")
+            val adapter = requireNotNull(sut.adapter)
 
             // richWorkspace is not set
-            Assert.assertFalse(sut.adapter.shouldShowHeader())
+            Assert.assertFalse(adapter.shouldShowHeader())
 
             testFolder.richWorkspace = " "
             activity.storageManager.saveFile(testFolder)
-            sut.adapter.swapDirectory(user, testFolder, activity.storageManager, false, "")
+            adapter.swapDirectory(user, testFolder, activity.storageManager, false, "")
 
-            Assert.assertFalse(sut.adapter.shouldShowHeader())
+            Assert.assertFalse(adapter.shouldShowHeader())
 
             testFolder.richWorkspace = null
             activity.storageManager.saveFile(testFolder)
-            sut.adapter.swapDirectory(user, testFolder, activity.storageManager, false, "")
-            Assert.assertFalse(sut.adapter.shouldShowHeader())
+            adapter.swapDirectory(user, testFolder, activity.storageManager, false, "")
+            Assert.assertFalse(adapter.shouldShowHeader())
 
             EspressoIdlingResource.increment()
             testFolder.richWorkspace = "1"
             activity.storageManager.saveFile(testFolder)
-            sut.adapter.setCurrentDirectory(testFolder)
+            adapter.setCurrentDirectory(testFolder)
 
-            Assert.assertTrue(sut.adapter.shouldShowHeader())
+            Assert.assertTrue(adapter.shouldShowHeader())
         }
     }
 

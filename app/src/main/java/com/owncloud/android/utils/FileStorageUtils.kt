@@ -44,8 +44,8 @@ import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
 import java.util.TimeZone
+import com.nextcloud.utils.AppConstants.ONE_SECOND
 
-@Suppress("TooManyFunctions")
 object FileStorageUtils {
     private val TAG: String = FileStorageUtils::class.java.simpleName
     private const val AUTO_UPLOAD_TAG = "AutoUpload"
@@ -64,7 +64,6 @@ object FileStorageUtils {
     private const val ENV_SECONDARY_STORAGE = "SECONDARY_STORAGE"
     private const val ENV_EMULATED_STORAGE_TARGET = "EMULATED_STORAGE_TARGET"
 
-    private const val FILE_SAVE_POLL_INTERVAL_MS = 1000L
     private const val UNKNOWN_AVAILABLE_SPACE = -1L
 
     private const val FIRST_PRINTABLE_CHAR = ' '
@@ -113,7 +112,7 @@ object FileStorageUtils {
 
     @JvmStatic
     fun getSavePath(accountName: String?): String =
-        joinPath(MainApp.getStoragePath(), MainApp.getDataFolder(), encodeAccountName(accountName))
+        joinPath(MainApp.getStoragePath(), MainApp.dataFolder, encodeAccountName(accountName))
 
     @JvmStatic
     fun getDefaultSavePathFor(accountName: String?, file: OCFile): String =
@@ -122,7 +121,7 @@ object FileStorageUtils {
     @JvmStatic
     fun getTemporalPath(accountName: String?): String = joinPath(
         MainApp.getStoragePath(),
-        MainApp.getDataFolder(),
+        MainApp.dataFolder,
         StringConstants.TEMP,
         encodeAccountName(accountName)
     )
@@ -137,7 +136,7 @@ object FileStorageUtils {
 
     @JvmStatic
     fun getAppTempDirectoryPath(context: Context): String =
-        joinPath(context.filesDir, MainApp.getDataFolder(), StringConstants.TEMP) + File.separator
+        joinPath(context.filesDir, MainApp.dataFolder, StringConstants.TEMP) + File.separator
 
     private fun encodeAccountName(accountName: String?): String? = Uri.encode(accountName, ACCOUNT_NAME_ALLOWED_CHARS)
 
@@ -186,7 +185,6 @@ object FileStorageUtils {
         }
     }
 
-    @Suppress("LongParameterList")
     @JvmStatic
     fun getInstantUploadFilePath(
         file: File,
@@ -336,7 +334,6 @@ object FileStorageUtils {
         } ?: false
     }
 
-    @Suppress("TooGenericExceptionCaught")
     @JvmStatic
     fun deleteRecursively(file: File, storageManager: FileDataStorageManager) {
         if (file.isDirectory) {
@@ -375,7 +372,7 @@ object FileStorageUtils {
             lastModified = realFile.lastModified()
             lastSize = realFile.length()
             try {
-                Thread.sleep(FILE_SAVE_POLL_INTERVAL_MS)
+                Thread.sleep(ONE_SECOND.inWholeMilliseconds)
             } catch (_: InterruptedException) {
                 Log_OC.d(TAG, "Interrupted while waiting for file to finish saving")
                 Thread.currentThread().interrupt()
@@ -501,7 +498,6 @@ object FileStorageUtils {
 
     private fun canListFiles(f: File): Boolean = f.canRead() && f.isDirectory
 
-    @Suppress("TooGenericExceptionThrown")
     @JvmStatic
     fun checkIfEnoughSpace(file: OCFile): Boolean {
         val availableSpaceOnDevice = FileOperationsHelper.getAvailableSpaceOnDevice()

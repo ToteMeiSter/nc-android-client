@@ -42,7 +42,6 @@ import java.util.Optional
 import java.util.Vector
 import kotlin.random.Random
 
-@Suppress("LongParameterList", "TooManyFunctions", "TooGenericExceptionCaught")
 class FileDownloadWorker(
     viewThemeUtils: ViewThemeUtils,
     private val accountManager: UserAccountManager,
@@ -100,7 +99,6 @@ class FileDownloadWorker(
 
     private var downloadError: FileDownloadError? = null
 
-    @Suppress("ReturnCount")
     override suspend fun doWork(): Result {
         return try {
             setUser()
@@ -245,7 +243,7 @@ class FileDownloadWorker(
         am.addOnAccountsUpdatedListener(this, null, false)
     }
 
-    @Suppress("TooGenericExceptionCaught", "DEPRECATION")
+    @Suppress("DEPRECATION")
     private suspend fun downloadFile(downloadKey: String) {
         currentDownload = pendingDownloads.get(downloadKey)
 
@@ -352,7 +350,7 @@ class FileDownloadWorker(
     private fun showDownloadErrorNotification(downloadError: FileDownloadError) {
         val text = when (downloadError) {
             FileDownloadError.Cancelled -> {
-                context.getString(R.string.downloader_file_download_cancelled)
+                context.getString(R.string.downloader_download_canceled)
             }
 
             FileDownloadError.Failed -> {

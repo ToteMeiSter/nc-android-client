@@ -15,11 +15,11 @@ import androidx.exifinterface.media.ExifInterface
 import com.nextcloud.utils.extensions.toFile
 import com.owncloud.android.lib.common.utils.Log_OC
 import com.owncloud.android.utils.BitmapUtils.calculateSampleFactor
+import com.nextcloud.utils.AppConstants.BYTES_PER_KB
 
 private const val TAG = "BitmapExtension"
 
-@Suppress("MagicNumber")
-fun Bitmap.allocationKilobyte(): Int = allocationByteCount.div(1024)
+fun Bitmap.allocationKilobyte(): Int = allocationByteCount.div(BYTES_PER_KB)
 
 /**
  * Scales down the Bitmap step by step until its size allocation is within the specified size.
@@ -70,7 +70,7 @@ fun Bitmap.scaleUntil(targetKB: Int): Bitmap {
  * @see ExifInterface
  * @see Matrix
  */
-@Suppress("MagicNumber", "ReturnCount")
+@Suppress("MagicNumber")
 fun Bitmap?.rotateBitmapViaExif(orientation: Int): Bitmap? {
     if (this == null) {
         return null
@@ -143,7 +143,6 @@ fun Bitmap?.rotateBitmapViaExif(orientation: Int): Bitmap? {
  * @param reqHeight Desired height in pixels of the output bitmap.
  * @return The decoded [Bitmap], or `null` if the file does not exist or decoding fails.
  */
-@Suppress("TooGenericExceptionCaught")
 fun decodeSampledBitmapFromFile(srcPath: String?, reqWidth: Int, reqHeight: Int): Bitmap? {
     // check existence of file
     srcPath?.toFile() ?: return null

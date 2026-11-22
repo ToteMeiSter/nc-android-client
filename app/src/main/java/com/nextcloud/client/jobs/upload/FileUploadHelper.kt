@@ -106,6 +106,7 @@ class FileUploadHelper {
          * Dupe of [UploadFileOperation.checkConditions], needed to check if the upload should even be scheduled
          * @return [UploadResult.UPLOADED] if the upload should be scheduled, otherwise the reason why it shouldn't
          */
+        @Suppress("LongParameterList")
         fun checkUploadConditions(
             upload: OCUpload,
             connectivity: Connectivity,
@@ -132,7 +133,7 @@ class FileUploadHelper {
             }
 
             // check if charging conditions are met; delay upload otherwise
-            if (upload.isWhileChargingOnly && !battery.isCharging && !battery.isFull) {
+            if (upload.isWhileChargingOnly && !battery.isCharging) {
                 conditions = UploadResult.DELAYED_FOR_CHARGING
             }
 
@@ -175,10 +176,10 @@ class FileUploadHelper {
             return
         }
 
-        val capability = fileStorageManager.getCapability(accountManager.user)
-
         appScope.launch {
             try {
+                val capability = fileStorageManager.getCapability(accountManager.user)
+
                 /**
                  * Rows are marked `UPLOAD_IN_PROGRESS` before upload starts.
                  * Only `updateDatabaseUploadResult()` writes status.
@@ -307,7 +308,6 @@ class FileUploadHelper {
         )
     }
 
-    @Suppress("LongParameterList")
     fun uploadAndCopyNewFilesForAlbum(data: OCUploadLocalPathData, albumName: String) {
         val uploads = getUploadsFromLocalPaths(data)
         backgroundJobManager.startAlbumFilesUploadJob(
@@ -356,7 +356,6 @@ class FileUploadHelper {
         return upload
     }
 
-    @Suppress("ReturnCount")
     fun getUploadByPaths(accountName: String, localPath: String, remotePath: String): UploadEntity? {
         val entity = uploadsStorageManager.uploadDao.getUploadByAccountAndPaths(
             accountName,
@@ -462,7 +461,6 @@ class FileUploadHelper {
         }
     }
 
-    @Suppress("ReturnCount")
     fun isUploading(remotePath: String?, accountName: String?): Boolean {
         accountName ?: return false
         if (!backgroundJobManager.isStartFileUploadJobScheduled(accountName)) {
@@ -480,7 +478,6 @@ class FileUploadHelper {
         return connectivityService.connectivity.isConnected && !connectivityService.isInternetWalled()
     }
 
-    @Suppress("ReturnCount")
     fun isUploadingNow(upload: OCUpload?): Boolean {
         val currentUploadFileOperation = FileUploadWorker.getCurrentUpload(upload?.uploadId)
         if (currentUploadFileOperation == null || currentUploadFileOperation.user == null) return false
@@ -606,7 +603,7 @@ class FileUploadHelper {
         }
     }
 
-    @Suppress("MagicNumber", "ReturnCount", "ComplexCondition")
+    @Suppress("MagicNumber", "ComplexCondition")
     fun isSameFileOnRemote(user: User?, localPath: String?, remotePath: String?, context: Context?): Boolean {
         if (user == null || localPath == null || remotePath == null || context == null) {
             Log_OC.e(TAG, "cannot compare remote and local file")

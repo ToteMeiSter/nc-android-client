@@ -24,6 +24,7 @@ import com.nextcloud.client.jobs.upload.FileUploadHelper;
 import com.nextcloud.client.jobs.upload.FileUploadWorker;
 import com.nextcloud.client.network.Connectivity;
 import com.nextcloud.client.network.ConnectivityService;
+import com.nextcloud.utils.AppConstants;
 import com.nextcloud.utils.autoRename.AutoRename;
 import com.nextcloud.utils.e2ee.E2ECounterHelper;
 import com.nextcloud.utils.e2ee.E2EVersionHelper;
@@ -96,7 +97,6 @@ import java.security.InvalidAlgorithmParameterException;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
 import java.security.cert.CertificateException;
-import java.security.spec.InvalidParameterSpecException;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -492,8 +492,7 @@ public class UploadFileOperation extends SyncOperation {
         // check if any parent is encrypted
         encryptedAncestor = FileStorageUtils.checkEncryptionStatus(parent, getStorageManager());
         mFile.setEncrypted(encryptedAncestor);
-        if (encryptedAncestor && parent != null) {
-            // - resume of encrypted upload, then parent file exists already as unlock is only for direct parent
+        if (parent != null) {
             mFile.setParentId(parent.getFileId());
         }
 
@@ -526,7 +525,7 @@ public class UploadFileOperation extends SyncOperation {
         Object object = null;
         FileChannel channel = null;
         ArbitraryDataProvider arbitraryDataProvider = new ArbitraryDataProviderImpl(getContext());
-        String publicKey = arbitraryDataProvider.getValue(user.getAccountName(), EncryptionUtils.PUBLIC_KEY);
+        String certificate = arbitraryDataProvider.getValue(user.getAccountName(), EncryptionUtils.CERTIFICATE);
 
         try {
             result = checkConditions(e2eFiles.getOriginalFile());
@@ -548,7 +547,7 @@ public class UploadFileOperation extends SyncOperation {
                     return new RemoteOperationResult<>(new IllegalStateException("Metadata does not exist"));
                 }
             } else {
-                object = getDecryptedFolderMetadataV1(publicKey, object);
+                object = getDecryptedFolderMetadataV1(certificate, object);
             }
 
             long counter = E2ECounterHelper.INSTANCE.getCounter(mContext, parentFile, object);
@@ -561,7 +560,7 @@ public class UploadFileOperation extends SyncOperation {
                 return new RemoteOperationResult<>(e);
             }
 
-            E2EClientData clientData = new E2EClientData(client, token, publicKey);
+            E2EClientData clientData = new E2EClientData(client, token, certificate);
 
             List<String> fileNames = uploadFileResolver.getCollidedFileNames(object);
 
@@ -580,7 +579,7 @@ public class UploadFileOperation extends SyncOperation {
                 return result;
             }
 
-            long lastModifiedTimestamp = e2eFiles.getOriginalFile().lastModified() / 1000;
+            long lastModifiedTimestamp = e2eFiles.getOriginalFile().lastModified() / AppConstants.MILLIS_PER_SECOND;
             Long creationTimestamp = FileUtil.getCreationTimestamp(e2eFiles.getOriginalFile());
             if (creationTimestamp == null) {
                 Log_OC.e(TAG, "UploadFileOperation creationTimestamp cannot be null");
@@ -648,7 +647,7 @@ public class UploadFileOperation extends SyncOperation {
         return token;
     }
 
-    private DecryptedFolderMetadataFileV1 getDecryptedFolderMetadataV1(String publicKey, Object object)
+    private DecryptedFolderMetadataFileV1 getDecryptedFolderMetadataV1(String certificate, Object object)
         throws NoSuchPaddingException, IllegalBlockSizeException, CertificateException, NoSuchAlgorithmException, BadPaddingException, InvalidKeyException {
 
         DecryptedFolderMetadataFileV1 metadata = new DecryptedFolderMetadataFileV1();
@@ -656,7 +655,7 @@ public class UploadFileOperation extends SyncOperation {
         metadata.getMetadata().setVersion(1.2);
         metadata.getMetadata().setMetadataKeys(new HashMap<>());
         String metadataKey = EncryptionUtils.encodeBytesToBase64String(EncryptionUtils.generateKey());
-        String encryptedMetadataKey = EncryptionUtils.encryptStringAsymmetric(metadataKey, publicKey);
+        String encryptedMetadataKey = EncryptionUtils.encryptStringAsymmetric(metadataKey, certificate);
         metadata.getMetadata().setMetadataKey(encryptedMetadataKey);
 
         if (object instanceof DecryptedFolderMetadataFileV1) {
@@ -786,7 +785,7 @@ public class UploadFileOperation extends SyncOperation {
         return result;
     }
 
-    private E2EData getE2EData(Object object) throws InvalidAlgorithmParameterException, NoSuchPaddingException, NoSuchAlgorithmException, InvalidKeyException, InvalidParameterSpecException, IOException {
+    private E2EData getE2EData(Object object) throws InvalidAlgorithmParameterException, NoSuchPaddingException, NoSuchAlgorithmException, InvalidKeyException, IOException {
         byte[] key = EncryptionUtils.generateKey();
         byte[] iv = EncryptionUtils.randomBytes(EncryptionUtils.ivLength);
         Cipher cipher = EncryptionUtils.getCipher(Cipher.ENCRYPT_MODE, key, iv);
@@ -849,7 +848,7 @@ public class UploadFileOperation extends SyncOperation {
 
         EncryptedFolderMetadataFileV1 encryptedFolderMetadata =
             EncryptionUtils.encryptFolderMetadata(metadata,
-                                                  clientData.getPublicKey(),
+                                                  clientData.getCertificate(),
                                                   parentFile.getLocalId(),
                                                   user,
                                                   arbitraryDataProvider
@@ -1059,7 +1058,7 @@ public class UploadFileOperation extends SyncOperation {
             }
 
             // Get the last modification date of the file from the file system
-            long lastModifiedTimestamp = originalFile.lastModified() / 1000;
+            long lastModifiedTimestamp = originalFile.lastModified() / AppConstants.MILLIS_PER_SECOND;
             final Long creationTimestamp = FileUtil.getCreationTimestamp(originalFile);
 
             Path filePath = Paths.get(mFile.getStoragePath());

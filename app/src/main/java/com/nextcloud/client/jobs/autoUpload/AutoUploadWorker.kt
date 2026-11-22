@@ -189,6 +189,9 @@ class AutoUploadWorker(
             return true
         }
 
+        // Upstream skips a charging-only folder here when the battery is not charging. We do not take that early
+        // exit: the same condition is enforced per file by AutoUploadConditionChecker, which records the skipped
+        // uploads as delayed in the uploads storage instead of ending the run silently.
         return false
     }
 
@@ -245,7 +248,7 @@ class AutoUploadWorker(
         }
     }
 
-    @Suppress("LongMethod", "DEPRECATION", "TooGenericExceptionCaught")
+    @Suppress("LongMethod", "DEPRECATION", "TooGenericExceptionCaught", "CyclomaticComplexMethod")
     private suspend fun uploadFiles(syncedFolder: SyncedFolder) = withContext(Dispatchers.IO) {
         val user = getUserOrReturn(syncedFolder) ?: run {
             Log_OC.i(DIAG, "worker upload folder=$syncedFolderId reason=user-missing")
@@ -356,6 +359,12 @@ class AutoUploadWorker(
 
                             if (result.code == ResultCode.UNAUTHORIZED) {
                                 Log_OC.e(TAG, "🔑 credentials are no longer valid, stopping auto upload")
+                                return@withContext
+                            }
+
+                            if (result.code == ResultCode.QUOTA_EXCEEDED) {
+                                Log_OC.w(TAG, "quota exceeded, stopping auto upload")
+                                sendUploadFinishEvent(operation, result)
                                 return@withContext
                             }
 

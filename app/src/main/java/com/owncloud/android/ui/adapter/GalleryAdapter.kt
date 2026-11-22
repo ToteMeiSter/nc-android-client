@@ -44,7 +44,6 @@ import com.owncloud.android.utils.FileSortOrder
 import com.owncloud.android.utils.theme.ViewThemeUtils
 import me.zhanghai.android.fastscroll.PopupTextProvider
 
-@Suppress("LongParameterList", "TooManyFunctions")
 class GalleryAdapter(
     val context: Context,
     user: User,
@@ -352,7 +351,7 @@ class GalleryAdapter(
     fun rowLayout(): GalleryRowLayout = GalleryRowLayout(
         columns,
         context.resources.displayMetrics.widthPixels,
-        context.resources.getInteger(R.integer.small_margin),
+        context.resources.getDimensionPixelSize(R.dimen.gallery_cell_spacing),
         defaultThumbnailSize
     )
 
@@ -388,7 +387,8 @@ class GalleryAdapter(
         directory: OCFile,
         storageManager: FileDataStorageManager,
         onlyOnDevice: Boolean,
-        mLimitToMimeType: String
+        mLimitToMimeType: String,
+        onSwapped: () -> Unit
     ) = Unit
 
     override fun setHighlightedItem(file: OCFile) = Unit

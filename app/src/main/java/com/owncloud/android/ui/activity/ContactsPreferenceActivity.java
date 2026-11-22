@@ -17,10 +17,13 @@ import com.nextcloud.client.jobs.BackgroundJobManager;
 import com.nextcloud.utils.extensions.IntentExtensionsKt;
 import com.owncloud.android.R;
 import com.owncloud.android.datamodel.OCFile;
+import com.owncloud.android.lib.common.operations.RemoteOperation;
+import com.owncloud.android.lib.common.operations.RemoteOperationResult;
 import com.owncloud.android.ui.fragment.FileFragment;
 import com.owncloud.android.ui.fragment.contactsbackup.BackupFragment;
 import com.owncloud.android.ui.fragment.contactsbackup.BackupListFragment;
 
+import com.owncloud.android.ui.navigation.model.ActionBarStyle;
 import javax.inject.Inject;
 
 import androidx.activity.OnBackPressedCallback;
@@ -69,7 +72,7 @@ public class ContactsPreferenceActivity extends FileActivity implements FileFrag
         setContentView(R.layout.contacts_preference);
 
         // setup toolbar
-        setupToolbar();
+        showActionBar(ActionBarStyle.Plain);
 
         // setup drawer
         //setupDrawer(R.id.nav_contacts); // TODO needed?
@@ -126,6 +129,11 @@ public class ContactsPreferenceActivity extends FileActivity implements FileFrag
     @Override
     public void onTransferStateChanged(OCFile file, boolean downloading, boolean uploading) {
         // not needed
+    }
+
+    @Override
+    public void onRemoteOperationFinish(RemoteOperation operation, RemoteOperationResult result) {
+        super.onRemoteOperationFinish(operation, result);
     }
 
     private final OnBackPressedCallback onBackPressedCallback = new OnBackPressedCallback(true) {

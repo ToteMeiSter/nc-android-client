@@ -314,7 +314,6 @@
     <string name="downloader_download_in_progress_ticker">Letöltés…</string>
     <string name="downloader_download_succeeded_content">%1$s letöltve</string>
     <string name="downloader_download_succeeded_ticker">Letöltve</string>
-    <string name="downloader_file_download_cancelled">Egyes fájlok letöltését megszakította a felhasználó</string>
     <string name="downloader_file_download_failed">Hiba történt a fájlok letöltése során</string>
     <string name="downloader_not_downloaded_yet">Még nincs letöltve</string>
     <string name="downloader_unexpected_error">Váratlan hiba történt a fájlok letöltése során</string>
@@ -354,7 +353,6 @@
     <string name="email_pick_failed">Az e-mail-cím kiválasztása sikertelen.</string>
     <string name="encrypted">Titkosítás bekapcsolása</string>
     <string name="end_to_end_encryption_certificate_unavailable">A kiszolgáló tanúsítványa nem kérhető le</string>
-    <string name="end_to_end_encryption_certificate_verification_failed">A nyilvános kulcs ellenőrzése sikertelen</string>
     <string name="end_to_end_encryption_confirm_button">Titkosítás beállítása</string>
     <string name="end_to_end_encryption_decrypting">Visszafejtés…</string>
     <string name="end_to_end_encryption_dialog_close">Bezárás</string>

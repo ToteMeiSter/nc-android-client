@@ -27,7 +27,6 @@ class CertificateValidator @Inject constructor() {
      * @param serverPublicKeyString Public key with header
      * @param certificate Certificate in PEM format
      */
-    @Suppress("TooGenericExceptionCaught")
     fun validate(serverPublicKeyString: String, certificate: String): Boolean {
         val contentOfServerKey = CryptoStringUtils.rawPublicKey(serverPublicKeyString)
 
@@ -41,9 +40,6 @@ class CertificateValidator @Inject constructor() {
             val certificateFactory = CertificateFactory.getInstance("X.509")
             val certificateInputStream = ByteArrayInputStream(certificate.toByteArray())
             val x509Certificate = certificateFactory.generateCertificate(certificateInputStream) as X509Certificate
-
-            // Check date of the certificate
-            x509Certificate.checkValidity()
 
             // Verify certificate with serverPublicKey
             x509Certificate.verify(serverPublicKey)

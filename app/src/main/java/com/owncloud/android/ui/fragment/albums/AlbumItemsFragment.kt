@@ -39,14 +39,17 @@ import androidx.lifecycle.repeatOnLifecycle
 import androidx.recyclerview.widget.GridLayoutManager
 import com.google.android.material.appbar.AppBarLayout
 import com.google.android.material.floatingactionbutton.FloatingActionButton
+import com.nextcloud.android.lib.resources.clientintegration.Endpoint
 import com.nextcloud.client.account.User
 import com.nextcloud.client.account.UserAccountManager
 import com.nextcloud.client.di.Injectable
 import com.nextcloud.client.jobs.upload.FileUploadWorker
 import com.nextcloud.client.utils.IntentUtil
-import com.nextcloud.client.utils.Throttler
+import com.nextcloud.client.utils.Throttle
 import com.nextcloud.repository.ClientRepository
 import com.nextcloud.ui.albumItemActions.AlbumItemActionsBottomSheet
+import com.nextcloud.ui.fileactions.FileActionHandler
+import com.nextcloud.ui.fileactions.FileActionHost
 import com.nextcloud.ui.fileactions.FileActionsBottomSheet
 import com.nextcloud.utils.SnackbarUtil
 import com.nextcloud.utils.extensions.getTypedActivity
@@ -87,7 +90,8 @@ import com.owncloud.android.ui.fragment.albums.util.AlbumCollageLayout
 import com.owncloud.android.ui.fragment.helper.ColumnCount
 import com.owncloud.android.ui.helpers.UriUploader
 import com.owncloud.android.ui.interfaces.OCFileListFragmentInterface
-import com.owncloud.android.ui.preview.PreviewImageFragment
+import com.owncloud.android.ui.navigation.model.ActionBarStyle
+import com.owncloud.android.ui.preview.media.PreviewMediaFragment
 import com.owncloud.android.utils.ClipboardUtil
 import com.owncloud.android.utils.ErrorMessageAdapter
 import com.owncloud.android.utils.MimeTypeUtil
@@ -107,7 +111,6 @@ import java.util.Optional
 import javax.inject.Inject
 import kotlin.time.Duration.Companion.milliseconds
 
-@Suppress("TooManyFunctions")
 class AlbumItemsFragment :
     Fragment(),
     OCFileListFragmentInterface,
@@ -118,13 +121,17 @@ class AlbumItemsFragment :
     lateinit var viewThemeUtils: ViewThemeUtils
 
     @Inject
+    lateinit var fileActionHandler: FileActionHandler
+
+    @Inject
     lateinit var accountManager: UserAccountManager
 
     @Inject
     lateinit var clientRepository: ClientRepository
 
-    @Inject
-    lateinit var throttler: Throttler
+    private val addMediaThrottle = Throttle()
+    private val actionsMenuThrottle = Throttle()
+    private val sharingSheetThrottle = Throttle()
 
     @Inject
     lateinit var thumbnailGenerator: ThumbnailGenerator
@@ -208,7 +215,7 @@ class AlbumItemsFragment :
     override fun onResume() {
         super.onResume()
         getTypedActivity(FileDisplayActivity::class.java)?.run {
-            setupToolbar()
+            showActionBar(ActionBarStyle.Plain)
             supportActionBar?.let { viewThemeUtils.files.themeActionBar(requireContext(), it, albumName) }
             showSortListGroup(false)
             setMainFabVisible(false)
@@ -491,7 +498,7 @@ class AlbumItemsFragment :
     }
 
     private fun openAddMediaMenu() {
-        throttler.run(THROTTLE_ADD_MEDIA) {
+        addMediaThrottle.run {
             val fragmentManager = requireActivity().supportFragmentManager
 
             AlbumItemActionsBottomSheet.newInstance()
@@ -507,7 +514,7 @@ class AlbumItemsFragment :
 
     fun onAlbumRenamed(newAlbumName: String) {
         albumName = newAlbumName
-        getTypedActivity(FileDisplayActivity::class.java)?.updateActionBarTitleAndHomeButtonByString(albumName)
+        getTypedActivity(FileDisplayActivity::class.java)?.setActionBarTitle(albumName)
     }
 
     fun onAlbumDeleted() {
@@ -516,8 +523,6 @@ class AlbumItemsFragment :
     //endregion
 
     //region Item interaction
-    override fun getColumnsCount(): Int = columnSize
-
     override fun isLoading(): Boolean = false
 
     override fun onHeaderClicked() = Unit
@@ -539,7 +544,7 @@ class AlbumItemsFragment :
         val activity = containerActivity as? FileDisplayActivity ?: return
 
         when {
-            PreviewImageFragment.canBePreviewed(file) ->
+            PreviewMediaFragment.canBePreviewed(file) ->
                 activity.startImagePreview(file, !file.isDown, VirtualFolderType.ALBUM)
 
             MimeTypeUtil.isVideo(file) ->
@@ -593,7 +598,7 @@ class AlbumItemsFragment :
 
     //region File actions
     private fun openActionsMenu(filesCount: Int, checkedFiles: Set<OCFile>) {
-        throttler.run(THROTTLE_OVERFLOW_CLICK) {
+        actionsMenuThrottle.launch(viewLifecycleOwner.lifecycleScope) {
             val actionsSheet = FileActionsBottomSheet.newInstance(
                 filesCount,
                 checkedFiles,
@@ -601,7 +606,9 @@ class AlbumItemsFragment :
                 hiddenFileActions(checkedFiles),
                 false,
                 contextMenuEndpoints(checkedFiles)
-            ).setResultListener(childFragmentManager, this) { id -> onFileActionChosen(id, checkedFiles) }
+            ).setResultListener(childFragmentManager, this@AlbumItemsFragment) { id ->
+                onFileActionChosen(id, checkedFiles)
+            }
 
             if (isDialogFragmentReady()) {
                 actionsSheet.show(childFragmentManager, TAG_FILE_ACTIONS)
@@ -619,30 +626,31 @@ class AlbumItemsFragment :
         return hidden
     }
 
-    private fun contextMenuEndpoints(checkedFiles: Set<OCFile>) = containerActivity
-        ?.storageManager
-        ?.getCapability(optionalUser?.get())
-        ?.getClientIntegrationEndpoints(Type.CONTEXT_MENU, checkedFiles.first().mimeType)
-        .orEmpty()
+    private suspend fun contextMenuEndpoints(checkedFiles: Set<OCFile>): List<Endpoint> {
+        val storageManager = containerActivity?.storageManager ?: return emptyList()
+        val user = optionalUser?.get()
+        val mimeType = checkedFiles.first().mimeType
 
-    private fun onFileActionChosen(@IdRes itemId: Int, checkedFiles: Set<OCFile>): Boolean {
-        if (checkedFiles.isEmpty()) {
-            return false
+        return withContext(Dispatchers.IO) {
+            storageManager.getCapability(user).getClientIntegrationEndpoints(Type.CONTEXT_MENU, mimeType)
         }
+    }
 
-        val fileOperationsHelper = containerActivity?.fileOperationsHelper
+    private fun onFileActionChosen(@IdRes itemId: Int, checkedFiles: Set<OCFile>) {
+        if (checkedFiles.isEmpty()) return
 
         when (itemId) {
             R.id.action_remove_file -> confirmFilesRemoval(checkedFiles)
-            R.id.action_favorite -> fileOperationsHelper?.toggleFavoriteFiles(checkedFiles, true)
-            R.id.action_unset_favorite -> fileOperationsHelper?.toggleFavoriteFiles(checkedFiles, false)
-            R.id.action_open_file_with -> fileOperationsHelper?.openFile(checkedFiles.first())
-            R.id.action_stream_media -> fileOperationsHelper?.streamMediaFile(checkedFiles.first())
-            R.id.action_select_all_action_menu -> selectAllFiles(true)
-            R.id.action_deselect_all_action_menu -> selectAllFiles(false)
-        }
 
-        return true
+            R.id.action_select_all_action_menu -> selectAllFiles(true)
+
+            R.id.action_deselect_all_action_menu -> selectAllFiles(false)
+
+            else -> containerActivity?.let {
+                val host = FileActionHost(it, parentFragmentManager, view, null)
+                fileActionHandler.handle(itemId, checkedFiles, host)
+            }
+        }
     }
 
     @Subscribe(threadMode = ThreadMode.BACKGROUND)
@@ -828,7 +836,7 @@ class AlbumItemsFragment :
 
     //region Album sharing
     private fun openAlbumSharingBottomSheet() {
-        throttler.run(THROTTLE_SHARING_SHEET) {
+        sharingSheetThrottle.run {
             val album = photoAlbumEntry ?: return@run
             val fragmentManager = requireActivity().supportFragmentManager
 
@@ -882,10 +890,6 @@ class AlbumItemsFragment :
         private const val TAG_ALBUM_ACTIONS = "album_actions"
         private const val TAG_ALBUM_SHARING = "album_sharing_sheet"
         private const val TAG_FILE_ACTIONS = "actions"
-
-        private const val THROTTLE_ADD_MEDIA = "addMediaClick"
-        private const val THROTTLE_SHARING_SHEET = "albumSharingSheet"
-        private const val THROTTLE_OVERFLOW_CLICK = "overflowClick"
 
         private const val ALBUMS_REMOTE_PATH = "/albums/"
         private const val ANY_MIME_TYPE = "*/*"

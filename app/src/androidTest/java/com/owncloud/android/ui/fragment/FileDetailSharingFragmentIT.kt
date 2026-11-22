@@ -58,7 +58,6 @@ import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
 
-@Suppress("TooManyFunctions")
 class FileDetailSharingFragmentIT : AbstractIT() {
     private val testClassName = "com.owncloud.android.ui.fragment.FileDetailSharingFragmentIT"
 
@@ -76,7 +75,7 @@ class FileDetailSharingFragmentIT : AbstractIT() {
                     remoteId = "00000001"
                     parentId = activity.storageManager.getFileByEncryptedRemotePath("/").fileId
                     permissions = OCFile.PERMISSION_CAN_RESHARE
-                    fileDataStorageManager.saveFile(this)
+                    storageManager.saveFile(this)
                 }
 
                 folder = OCFile("/test").apply {

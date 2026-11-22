@@ -87,6 +87,7 @@ import com.owncloud.android.ui.dialog.SortingOrderDialogFragment;
 import com.owncloud.android.ui.fragment.TaskRetainerFragment;
 import com.owncloud.android.ui.helpers.FileOperationsHelper;
 import com.owncloud.android.ui.helpers.UriUploader;
+import com.owncloud.android.ui.navigation.model.ActionBarStyle;
 import com.owncloud.android.utils.DataHolderUtil;
 import com.owncloud.android.utils.ErrorMessageAdapter;
 import com.owncloud.android.utils.FileSortOrder;
@@ -219,7 +220,7 @@ public class ReceiveExternalFilesActivity extends FileActivity
     }
 
     @Override
-    protected void setAccount(Account account, boolean savedAccount) {
+    protected void setAccount(Account account) {
         Account[] accounts = mAccountManager.getAccountsByType(MainApp.getAccountType(this));
         if (accounts.length == 0) {
             Log_OC.i(TAG, "No ownCloud account is available");
@@ -234,7 +235,7 @@ public class ReceiveExternalFilesActivity extends FileActivity
                            );
         }
 
-        super.setAccount(account, savedAccount);
+        super.setAccount(account);
     }
 
     private void showAccountChooserDialog() {
@@ -248,7 +249,7 @@ public class ReceiveExternalFilesActivity extends FileActivity
 
     @Override
     public void onAccountChosen(@NonNull User user) {
-        setAccount(user.toPlatformAccount(), false);
+        setAccount(user.toPlatformAccount());
         initTargetFolder();
         populateDirectoryList(null);
     }
@@ -733,7 +734,7 @@ public class ReceiveExternalFilesActivity extends FileActivity
                 // there is no need for checking for is there more then one
                 // account at this point
                 // since account setup can set only one account at time
-                setAccount(accounts[0], false);
+                setAccount(accounts[0]);
                 populateDirectoryList(null);
             }
         }
@@ -751,7 +752,7 @@ public class ReceiveExternalFilesActivity extends FileActivity
 
     private void populateDirectoryList(OCFile file) {
         setupEmptyList();
-        setupToolbar();
+        showActionBar(ActionBarStyle.Plain);
         ActionBar actionBar = getSupportActionBar();
         setupActionBarSubtitle();
 

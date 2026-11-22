@@ -318,7 +318,6 @@
     <string name="downloader_download_in_progress_ticker">Descargando…</string>
     <string name="downloader_download_succeeded_content">%1$s descargado</string>
     <string name="downloader_download_succeeded_ticker">Descargado</string>
-    <string name="downloader_file_download_cancelled">Ciertos archivos fueron cancelados durante la descarga por el usuario</string>
     <string name="downloader_file_download_failed">Ocurrió un error mientras se descargaban archivos</string>
     <string name="downloader_not_downloaded_yet">No descargado todavía</string>
     <string name="downloader_unexpected_error">Ocurrió un error inesperado mientras se descargaban archivos</string>
@@ -358,7 +357,6 @@
     <string name="email_pick_failed">Fallo al seleccionar dirección de correo.</string>
     <string name="encrypted">Establecer como cifrado</string>
     <string name="end_to_end_encryption_certificate_unavailable">No fue posible recuperar el certificado del servidor</string>
-    <string name="end_to_end_encryption_certificate_verification_failed">Fallo al verificar la clave pública</string>
     <string name="end_to_end_encryption_confirm_button">Configurar cifrado</string>
     <string name="end_to_end_encryption_decrypting">Descifrando…</string>
     <string name="end_to_end_encryption_dialog_close">Cerrar</string>
@@ -723,6 +721,7 @@
     <string name="picture_set_as_no_app">No se ha encontrado una app para establecer con ella la imagen</string>
     <string name="pin_home">Anclar a la pantalla de inicio</string>
     <string name="pin_shortcut_label">Abrir %1$s</string>
+    <string name="player_control_view_next_button_content_description">Botón Siguiente</string>
     <string name="player_media_controls_close_action_title">Cerrar</string>
     <string name="please_select_a_server">Por favor, seleccione un servidor…</string>
     <string name="power_save_check_dialog_message">Desactivar la comprobación de ahorro de energía puede causar que se suban ficheros aun estando en modo de baja batería</string>

@@ -313,7 +313,6 @@
     <string name="downloader_download_in_progress_ticker">Descargando…</string>
     <string name="downloader_download_succeeded_content">Descargado %1$s</string>
     <string name="downloader_download_succeeded_ticker">Descargado</string>
-    <string name="downloader_file_download_cancelled">Algúns ficheiros foron cancelados durante a descarga polo usuario</string>
     <string name="downloader_file_download_failed">Produciuse un erro ao descargar ficheiros</string>
     <string name="downloader_not_downloaded_yet">Aínda non foi descargado</string>
     <string name="downloader_unexpected_error">Produciuse un erro non agardado ao descargar ficheiros</string>
@@ -353,7 +352,6 @@
     <string name="email_pick_failed">Produciuse un fallo ao escoller o enderezo de correo.</string>
     <string name="encrypted">Definir como cifrado</string>
     <string name="end_to_end_encryption_certificate_unavailable">Non é posíbel recuperar o certificado de servidor</string>
-    <string name="end_to_end_encryption_certificate_verification_failed">Produciuse un fallo ao verificar a chave pública</string>
     <string name="end_to_end_encryption_confirm_button">Configurar a cifraxe</string>
     <string name="end_to_end_encryption_decrypting">Descifrando…</string>
     <string name="end_to_end_encryption_dialog_close">Pechar</string>

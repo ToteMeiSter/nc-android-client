@@ -15,6 +15,8 @@ import android.content.Intent
 import android.content.IntentFilter
 import android.content.res.Resources
 import android.os.Bundle
+import android.os.Handler
+import android.os.Looper
 import android.os.Parcelable
 import android.view.ActionMode
 import android.view.Menu
@@ -47,6 +49,7 @@ import com.owncloud.android.ui.events.SearchEvent
 import com.owncloud.android.ui.fragment.EmptyListState
 import com.owncloud.android.ui.fragment.FileFragment
 import com.owncloud.android.ui.fragment.OCFileListFragment
+import com.owncloud.android.ui.navigation.model.ActionBarStyle
 import com.owncloud.android.utils.DataHolderUtil
 import com.owncloud.android.utils.ErrorMessageAdapter
 import com.owncloud.android.utils.FileSortOrder
@@ -56,7 +59,6 @@ import kotlinx.coroutines.launch
 import java.io.File
 import javax.inject.Inject
 
-@Suppress("Detekt.TooManyFunctions")
 open class FolderPickerActivity :
     FileActivity(),
     FileFragment.ContainerActivity,
@@ -99,7 +101,7 @@ open class FolderPickerActivity :
 
         initBinding()
         initControls()
-        setupToolbar()
+        showActionBar(ActionBarStyle.Plain)
         setupActionBar()
         setupAction()
         initTargetFilesPath()
@@ -108,7 +110,7 @@ open class FolderPickerActivity :
             createFragments()
         }
 
-        updateActionBarTitleAndHomeButtonByString(captionText)
+        setActionBarTitle(captionText)
         handleBackPress()
     }
 
@@ -239,7 +241,7 @@ open class FolderPickerActivity :
     }
 
     override fun onSavedCertificate() {
-        startSyncFolderOperation(currentDir, false)
+        startSyncFolderOperation(getCurrentDir(), false)
     }
 
     private fun startSyncFolderOperation(folder: OCFile?, ignoreETag: Boolean) {
@@ -267,7 +269,7 @@ open class FolderPickerActivity :
                 { _, _ ->
                     listOfFilesFragment?.setEmptyListMessage(EmptyListState.LOCAL_FILE_LIST_EMPTY_FILE)
                 },
-                null
+                Handler(Looper.getMainLooper())
             )
         }
     }
@@ -376,7 +378,6 @@ open class FolderPickerActivity :
         updateNavigationElementsInActionBar()
     }
 
-    @Suppress("ReturnCount")
     private fun toggleChooseEnabled() {
         if (this is FilePickerActivity) {
             return
@@ -449,7 +450,8 @@ open class FolderPickerActivity :
     }
 
     private fun getSelectedFolderPathTitle(): String? {
-        val atRoot = (currentDir == null || currentDir?.parentId == 0L)
+        val currentDir = getCurrentDir()
+        val atRoot = (currentDir == null || currentDir.parentId == 0L)
         return if (atRoot) captionText ?: "" else currentDir?.fileName
     }
 
@@ -536,7 +538,7 @@ open class FolderPickerActivity :
             return
         }
 
-        listOfFilesFragment?.onMessageEvent(
+        listOfFilesFragment?.onSearchEvent(
             SearchEvent(
                 query,
                 SearchRemoteOperation.SearchType.FILE_SEARCH
@@ -549,9 +551,8 @@ open class FolderPickerActivity :
          * [BroadcastReceiver] to enable syncing feedback in UI
          */
         @Suppress(
-            "Detekt.ComplexMethod",
+            "Detekt.CyclomaticComplexMethod",
             "Detekt.NestedBlockDepth",
-            "Detekt.TooGenericExceptionCaught",
             "Detekt.LongMethod"
         ) // legacy code
         override fun onReceive(context: Context, intent: Intent) {

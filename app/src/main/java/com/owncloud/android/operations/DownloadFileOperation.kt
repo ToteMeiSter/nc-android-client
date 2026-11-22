@@ -38,7 +38,6 @@ import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.atomic.AtomicBoolean
 import javax.crypto.Cipher
 
-@Suppress("LongParameterList", "ReturnCount")
 class DownloadFileOperation(
     val user: User,
     val file: OCFile,
@@ -57,6 +56,9 @@ class DownloadFileOperation(
     private var timestampForModification: Long = 0
     private val cancellationRequested = AtomicBoolean(false)
     private val mainThreadHandler = Handler(Looper.getMainLooper())
+
+    @Volatile
+    private var downloadOperation: DownloadFileRemoteOperation? = null
 
     constructor(user: User, file: OCFile, context: Context?) : this(
         user,
@@ -166,6 +168,8 @@ class DownloadFileOperation(
             if (downloadType == DownloadType.DOWNLOAD) {
                 dataTransferListeners.forEach { op.addProgressListener(it) }
             }
+            downloadOperation = op
+            if (cancellationRequested.get()) op.cancel()
         }
         val result = operation.execute(client.toNextcloudClient(operationContext)) as RemoteOperationResult<Unit>
         return DownloadResult(operation, result)
@@ -262,6 +266,7 @@ class DownloadFileOperation(
 
     fun cancel() {
         cancellationRequested.set(true)
+        downloadOperation?.cancel()
     }
 
     fun addProgressListener(listener: OnDatatransferProgressListener) {

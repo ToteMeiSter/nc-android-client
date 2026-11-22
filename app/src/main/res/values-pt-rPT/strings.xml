@@ -296,7 +296,6 @@
     <string name="downloader_download_in_progress_ticker">A transferir…</string>
     <string name="downloader_download_succeeded_content">%1$s transferido</string>
     <string name="downloader_download_succeeded_ticker">Transferido</string>
-    <string name="downloader_file_download_cancelled">Certos ficheiros foram cancelados pelo utilizador durante a transferência</string>
     <string name="downloader_file_download_failed">Ocorreu um erro ao transferir os ficheiros</string>
     <string name="downloader_not_downloaded_yet">Ainda não transferido</string>
     <string name="downloader_unexpected_error">Ocorreu um erro inesperado enquanto transferia os ficheiros</string>
@@ -334,7 +333,6 @@
     <string name="email_pick_failed">Erro ao escolher endereço de email.</string>
     <string name="encrypted">Definir como encriptado</string>
     <string name="end_to_end_encryption_certificate_unavailable">Não foi possível obter o certificado do servidor</string>
-    <string name="end_to_end_encryption_certificate_verification_failed">Erro ao verificar a chave pública</string>
     <string name="end_to_end_encryption_confirm_button">Definir encriptação</string>
     <string name="end_to_end_encryption_decrypting">Decryption…</string>
     <string name="end_to_end_encryption_dialog_close">Fechar</string>

@@ -17,6 +17,7 @@ import android.view.LayoutInflater
 import android.view.ViewGroup
 import android.widget.ImageView
 import androidx.recyclerview.widget.RecyclerView
+import com.nextcloud.android.common.core.utils.AccountNameUtils
 import com.nextcloud.client.account.User
 import com.nextcloud.utils.avatar.AvatarGenerationListener
 import com.nextcloud.utils.avatar.AvatarGenerator
@@ -37,7 +38,6 @@ import kotlin.math.min
 /**
  * Adapter to show a user/group/email/remote in Sharing list in file details view.
  */
-@Suppress("LongParameterList")
 class ShareeListAdapter(
     private val fileActivity: FileActivity,
     @JvmField var shares: ArrayList<OCShare>,
@@ -157,7 +157,7 @@ class ShareeListAdapter(
     override fun shouldCallGeneratedCallback(tag: String?, callContext: Any?): Boolean {
         if (callContext is ImageView) {
             // needs to be changed once federated users have avatars
-            return callContext.tag.toString() == tag?.substringBefore('@')
+            return callContext.tag.toString() == tag?.let(AccountNameUtils::getUserPart)
         }
         return false
     }

@@ -26,7 +26,6 @@ class OCFileListAdapterHelper {
     private val scope = CoroutineScope(Dispatchers.IO + SupervisorJob())
     private var job: Job? = null
 
-    @Suppress("LongParameterList")
     fun prepareFileList(
         directory: OCFile,
         dataProvider: OCFileListAdapterDataProvider,
@@ -54,6 +53,7 @@ class OCFileListAdapterHelper {
         }
     }
 
+    @Suppress("CyclomaticComplexMethod")
     suspend fun prepareFileList(
         directory: OCFile,
         dataProvider: OCFileListAdapterDataProvider,
@@ -64,7 +64,7 @@ class OCFileListAdapterHelper {
     ): Pair<List<OCFile>, FileSortOrder> {
         val showHiddenFiles = preferences.isShowHiddenFilesEnabled()
         val hasMimeTypeFilter = limitToMimeType.isNotEmpty()
-        val isRootAndPersonalOnly = (OCFile.ROOT_PATH == directory.remotePath && MainApp.isOnlyPersonFiles())
+        val isRootAndPersonalOnly = (OCFile.ROOT_PATH == directory.remotePath && MainApp.isOnlyPersonFiles)
 
         val rawResult = getFolderContent(directory, dataProvider, onlyOnDevice)
         val filtered = ArrayList<OCFile>(rawResult.size)
@@ -184,7 +184,6 @@ class OCFileListAdapterHelper {
     fun indexOfSameRemoteFile(files: List<OCFile>, target: OCFile): Int =
         files.indexOfFirst { isSameRemoteFile(it, target) }
 
-    @Suppress("ReturnCount")
     fun isSameRemoteFile(file: OCFile, target: OCFile): Boolean {
         if (file.fileId == target.fileId) {
             return true

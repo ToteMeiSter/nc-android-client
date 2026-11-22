@@ -311,7 +311,6 @@
     <string name="downloader_download_in_progress_ticker">ダウンロード中…</string>
     <string name="downloader_download_succeeded_content">%1$s は正常にダウンロードされました</string>
     <string name="downloader_download_succeeded_ticker">ダウンロード済</string>
-    <string name="downloader_file_download_cancelled">ユーザーのダウンロード中に一部のファイルがキャンセルされました</string>
     <string name="downloader_file_download_failed">ファイルのダウンロード中にエラーが発生しました</string>
     <string name="downloader_not_downloaded_yet">未ダウンロード</string>
     <string name="downloader_unexpected_error">ファイルのダウンロード中に予期しないエラーが発生しました</string>
@@ -348,7 +347,6 @@
     <string name="email_pick_failed">メールアドレスの選択に失敗しました。</string>
     <string name="encrypted">暗号化設定</string>
     <string name="end_to_end_encryption_certificate_unavailable">サーバー証明書を取得できません</string>
-    <string name="end_to_end_encryption_certificate_verification_failed">公開鍵の検証に失敗しました</string>
     <string name="end_to_end_encryption_confirm_button">暗号化を設定する</string>
     <string name="end_to_end_encryption_decrypting">復号化中…</string>
     <string name="end_to_end_encryption_dialog_close">閉じる</string>

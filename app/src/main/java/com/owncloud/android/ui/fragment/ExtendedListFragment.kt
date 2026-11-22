@@ -62,8 +62,6 @@ import com.owncloud.android.MainApp
 import com.owncloud.android.R
 import com.owncloud.android.databinding.ListFragmentBinding
 import com.owncloud.android.lib.common.utils.Log_OC
-import com.owncloud.android.lib.resources.files.SearchRemoteOperation
-import com.owncloud.android.lib.resources.status.OwnCloudVersion
 import com.owncloud.android.ui.EmptyRecyclerView
 import com.owncloud.android.ui.activity.FileDisplayActivity
 import com.owncloud.android.ui.activity.FolderPickerActivity
@@ -71,15 +69,13 @@ import com.owncloud.android.ui.activity.OnEnforceableRefreshListener
 import com.owncloud.android.ui.activity.UploadFilesActivity
 import com.owncloud.android.ui.adapter.localFileList.LocalFileListAdapter
 import com.owncloud.android.ui.adapter.filelist.OCFileListAdapter
-import com.owncloud.android.ui.events.SearchEvent
 import com.owncloud.android.utils.theme.ViewThemeUtils
-import org.greenrobot.eventbus.EventBus
 import javax.inject.Inject
 import kotlin.math.max
 import kotlin.math.min
 import kotlin.math.roundToInt
 
-@Suppress("MagicNumber", "TooManyFunctions")
+@Suppress("MagicNumber")
 open class ExtendedListFragment :
     Fragment(),
     AdapterView.OnItemClickListener,
@@ -199,7 +195,7 @@ open class ExtendedListFragment :
                 if (activity is FileDisplayActivity) {
                     val fragment = activity.leftFragment
                     if (fragment is OCFileListFragment) {
-                        fragment.setFabVisible(!hasFocus)
+                        if (hasFocus) fragment.setFabState(FabState.HIDDEN) else fragment.updateFabState()
                     }
                 }
 
@@ -234,7 +230,6 @@ open class ExtendedListFragment :
         return false
     }
 
-    @Suppress("ReturnCount")
     override fun onQueryTextSubmit(query: String): Boolean {
         val adapter = recyclerView?.adapter
         if (adapter is OCFileListAdapter) {
@@ -261,18 +256,7 @@ open class ExtendedListFragment :
                 } else {
                     Handler(Looper.getMainLooper()).post {
                         if (adapter is OCFileListAdapter) {
-                            if (accountManager
-                                    .user
-                                    .server
-                                    .version
-                                    .isNewerOrEqual(OwnCloudVersion.nextcloud_20)
-                            ) {
-                                activity.performUnifiedSearch(query, listOfHiddenFiles)
-                            } else {
-                                EventBus.getDefault().post(
-                                    SearchEvent(query, SearchRemoteOperation.SearchType.FILE_SEARCH)
-                                )
-                            }
+                            activity.performUnifiedSearch(query, listOfHiddenFiles)
                         } else if (adapter is LocalFileListAdapter) {
                             adapter.filter(query)
                         }
@@ -409,7 +393,7 @@ open class ExtendedListFragment :
     }
 
     private fun getEmptyListViewTextId(): Int {
-        val currentDir = getTypedActivity(FileDisplayActivity::class.java)?.currentDir
+        val currentDir = getTypedActivity(FileDisplayActivity::class.java)?.getCurrentDir()
         return if (currentDir?.canCreateFileAndFolder() == false) {
             R.string.extented_list_fragment_empty_list_message_no_write_permission
         } else {
@@ -615,7 +599,7 @@ open class ExtendedListFragment :
         }
     }
 
-    @Suppress("LongMethod")
+    @Suppress("LongMethod", "CyclomaticComplexMethod")
     fun setEmptyListMessage(state: Parcelable?) {
         when (state) {
             SearchType.NO_SEARCH -> {

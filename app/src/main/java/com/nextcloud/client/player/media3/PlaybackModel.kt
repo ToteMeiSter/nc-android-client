@@ -20,14 +20,14 @@ import com.nextcloud.client.player.media3.session.MediaSessionFactory
 import com.nextcloud.client.player.model.PlaybackSettings
 import com.nextcloud.client.player.model.file.PlaybackFile
 import com.nextcloud.client.player.model.file.PlaybackFiles
+import com.nextcloud.client.player.model.state.PlayMode
 import com.nextcloud.client.player.model.state.PlaybackState
-import com.nextcloud.client.player.model.state.RepeatMode
 import com.nextcloud.client.player.util.PeriodicAction
 import com.nextcloud.client.player.util.PlayerUtil.indexOfFirst
 import com.nextcloud.client.player.util.PlayerUtil.playbackFile
 import com.nextcloud.client.player.util.PlayerUtil.readCurrentFiles
 import com.nextcloud.client.player.util.PlayerUtil.readMediaIds
-import com.nextcloud.client.player.util.PlayerUtil.setRepeatMode
+import com.nextcloud.client.player.util.PlayerUtil.setPlayMode
 import com.nextcloud.client.player.util.PlayerUtil.toMediaItem
 import com.nextcloud.client.player.util.PlayerUtil.toPlaybackState
 import com.nextcloud.client.player.util.PlayerUtil.updateMediaItems
@@ -47,19 +47,15 @@ import javax.inject.Inject
 import javax.inject.Singleton
 import kotlin.coroutines.resume
 import kotlin.coroutines.resumeWithException
+import com.nextcloud.utils.AppConstants.ONE_SECOND
 
 @Singleton
 @OptIn(markerClass = [UnstableApi::class])
-@Suppress("TooManyFunctions")
 class PlaybackModel @Inject constructor(
     private val context: Context,
     private val mediaSessionFactory: MediaSessionFactory,
     private val playbackSettings: PlaybackSettings
 ) {
-
-    companion object {
-        private const val CHECK_PROGRESS_INTERVAL = 1000L
-    }
 
     interface Listener {
         fun onPlaybackUpdate(state: PlaybackState)
@@ -68,7 +64,7 @@ class PlaybackModel @Inject constructor(
 
     private val listeners = mutableListOf<Listener>()
 
-    private val checkProgressPeriodicAction = PeriodicAction(CHECK_PROGRESS_INTERVAL) {
+    private val checkProgressPeriodicAction = PeriodicAction(ONE_SECOND.inWholeMilliseconds) {
         notifyPlaybackUpdate()
     }
 
@@ -142,8 +138,7 @@ class PlaybackModel @Inject constructor(
             .await()
             .apply {
                 addListener(playerListener)
-                setRepeatMode(playbackSettings.repeatMode)
-                shuffleModeEnabled = playbackSettings.isShuffle
+                setPlayMode(playbackSettings.playMode)
             }
         controllerScope = CoroutineScope(SupervisorJob() + Dispatchers.Main.immediate)
     }
@@ -166,7 +161,6 @@ class PlaybackModel @Inject constructor(
         controllerScope = null
     }
 
-    @Suppress("TooGenericExceptionCaught")
     private suspend fun <T> ListenableFuture<T>.await(): T = suspendCancellableCoroutine { cont ->
         addListener(
             {
@@ -286,14 +280,9 @@ class PlaybackModel @Inject constructor(
         controller?.seekTo(positionInMilliseconds)
     }
 
-    fun setRepeatMode(repeatMode: RepeatMode) {
-        playbackSettings.setRepeatMode(repeatMode)
-        controller?.setRepeatMode(repeatMode)
-    }
-
-    fun setShuffle(shuffle: Boolean) {
-        playbackSettings.setShuffle(shuffle)
-        controller?.shuffleModeEnabled = shuffle
+    fun setPlayMode(playMode: PlayMode) {
+        playbackSettings.setPlayMode(playMode)
+        controller?.setPlayMode(playMode)
     }
 
     fun switchToFile(file: PlaybackFile) {
@@ -325,8 +314,7 @@ class PlaybackModel @Inject constructor(
     private fun releasedState(): PlaybackState = PlaybackState(
         currentFiles = emptyList(),
         currentItemState = null,
-        repeatMode = playbackSettings.repeatMode,
-        shuffle = playbackSettings.isShuffle
+        playMode = playbackSettings.playMode
     )
 
     private fun notifyPlaybackError(error: Throwable) {

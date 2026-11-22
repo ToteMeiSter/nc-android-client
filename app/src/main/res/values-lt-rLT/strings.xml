@@ -321,7 +321,6 @@
     <string name="downloader_download_in_progress_ticker">Atsisiunčiama…</string>
     <string name="downloader_download_succeeded_content">%1$s atsisiųsta</string>
     <string name="downloader_download_succeeded_ticker">Atsisiųsti</string>
-    <string name="downloader_file_download_cancelled">Kai kurių failų atsisiuntimas buvo vartotojo atšauktas.</string>
     <string name="downloader_file_download_failed">Atsiunčiant failus, įvyko klaida</string>
     <string name="downloader_not_downloaded_yet">Kol kas neatsisiųsta</string>
     <string name="downloader_unexpected_error">Atsiunčiant failus, įvyko netikėta klaida</string>
@@ -361,7 +360,6 @@
     <string name="email_pick_failed">Nepavyko pasirinkti el. pašto adreso.</string>
     <string name="encrypted">Nustatyti kaip šifruotą</string>
     <string name="end_to_end_encryption_certificate_unavailable">Nepavyko gauti serverio sertifikato</string>
-    <string name="end_to_end_encryption_certificate_verification_failed">Nepavyko patvirtinti viešojo rakto</string>
     <string name="end_to_end_encryption_confirm_button">Nustatyti šifravimą</string>
     <string name="end_to_end_encryption_decrypting">Iššifruojama…</string>
     <string name="end_to_end_encryption_dialog_close">Užverti</string>

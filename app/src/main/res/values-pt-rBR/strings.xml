@@ -343,6 +343,7 @@
     <string name="download_download_invalid_local_file_name">Nome de arquivo inválido para o arquivo local</string>
     <string name="download_latest_dev_version">Baixar a última versão dev</string>
     <string name="download_limit">Limite de download </string>
+    <string name="downloader_download_canceled">Download cancelado</string>
     <string name="downloader_download_failed_content">Não foi possível baixar %1$s</string>
     <string name="downloader_download_failed_credentials_error">Download falhou, logue-se novamente</string>
     <string name="downloader_download_failed_ticker">Download falhou</string>
@@ -351,7 +352,6 @@
     <string name="downloader_download_in_progress_ticker">Baixando…</string>
     <string name="downloader_download_succeeded_content">%1$s baixado</string>
     <string name="downloader_download_succeeded_ticker">Baixado</string>
-    <string name="downloader_file_download_cancelled">Certos arquivos foram cancelados durante o download pelo usuário</string>
     <string name="downloader_file_download_failed">Ocorreu um erro ao baixar arquivos</string>
     <string name="downloader_not_downloaded_yet">Ainda não baixado</string>
     <string name="downloader_unexpected_error">Ocorreu um erro inesperado ao baixar arquivos</string>
@@ -397,11 +397,8 @@
     <string name="encryption_encrypt_unavailable">Não é possível criptografar esta pasta. A criptografia de ponta-a-ponta não está configurada neste servidor.</string>
     <string name="encryption_key_checking_keys">Verificando as chaves…</string>
     <string name="encryption_key_handle_folder_read_only_description">As chaves de criptografia desta conta foram removidas ou substituídas, portanto, o conteúdo desta pasta não pode mais ser descriptografado.\n\nA partir de agora, a pasta estará apenas para leitura. Para voltar a usar pastas criptografadas, faça um backup desta pasta e configure sua nova chave de criptografia nas configurações.</string>
-    <string name="encryption_key_handle_key_keys_only_on_device_description">A chave de criptografia armazenada neste dispositivo não é mais válida. As chaves foram revogadas pelo servidor. \n\nRemova a criptografia localmente nas configurações para criar uma nova pasta criptografada.</string>
-    <string name="encryption_key_handle_key_keys_only_on_device_outdated_description">A chave de criptografia armazenada neste dispositivo não é mais válida. As chaves foram revogadas pelo servidor. \n\nFaça um backup da pasta criptografada criada anteriormente. \n\nEm seguida, remova a criptografia localmente nas configurações para criar uma nova pasta criptografada.</string>
     <string name="encryption_key_handle_key_removed_title">Chaves de criptografia alteradas</string>
     <string name="encryption_key_handle_no_keys_description">Esta pasta não pode ser aberta porque suas chaves de criptografia não existem mais neste dispositivo nem no servidor.</string>
-    <string name="encryption_key_handle_setup_new_key_before_encrypting_description">As chaves de criptografia desta conta foram removidas ou substituídas.\n\nConfigure sua nova chave de criptografia nas configurações antes de criptografar uma pasta.</string>
     <string name="encryption_new_folder_check_failed">Não foi possível verificar suas chaves de criptografia. Tente criar a pasta novamente.</string>
     <string name="encryption_new_folder_no_network">Não é possível acessar o servidor. Tente criar a pasta novamente mais tarde.</string>
     <string name="encryption_new_folder_unavailable">Não é possível criar pastas criptografadas. A criptografia de ponta-a-ponta não está configurada neste servidor.</string>
@@ -410,8 +407,8 @@
     <string name="encryption_open_no_network">Não é possível acessar o servidor. Tente abrir a pasta novamente mais tarde.</string>
     <string name="encryption_open_unavailable">Não é possível abrir esta pasta. A criptografia de ponta-a-ponta não está configurada neste servidor.</string>
     <string name="end_to_end_encryption_certificate_unavailable">Não é possível recuperar o certificado do servidor</string>
-    <string name="end_to_end_encryption_certificate_verification_failed">Falha ao verificar a chave pública</string>
     <string name="end_to_end_encryption_confirm_button">Definir criptografia</string>
+    <string name="end_to_end_encryption_could_not_verify_certificate">Não foi possível verificar o certificado de criptografia</string>
     <string name="end_to_end_encryption_decrypting">Descriptografando…</string>
     <string name="end_to_end_encryption_dialog_close">Fechar</string>
     <string name="end_to_end_encryption_enter_passphrase_to_access_files">Digite sua senha para acessar seus arquivos</string>
@@ -610,6 +607,7 @@
     <string name="foreign_files_remote_text">Remoto: %1$s</string>
     <string name="forward">Adiante</string>
     <string name="fourHours">4 horas</string>
+    <string name="gallery_unsupported_file">Tipo de arquivo não suportado</string>
     <string name="governance_file_retention_label">Retenção de arquivo</string>
     <string name="governance_legal_hold_label">Retenção legal</string>
     <string name="governance_no_label">Nenhum</string>
@@ -982,6 +980,7 @@
     <string name="share_link_file_no_exist">Não foi possível compartilhar. Verifique se o arquivo existe.</string>
     <string name="share_link_forbidden_permissions">para compartilhar este arquivo</string>
     <string name="share_link_optional_password_title">Digite uma senha opcional</string>
+    <string name="share_link_password_rejected">A senha não atende aos requisitos de senha. Tente usar uma senha mais longa ou mais complexa.</string>
     <string name="share_link_password_title">Digite uma senha</string>
     <string name="share_link_with_label">Compartilhar link (%1$s)</string>
     <string name="share_no_expiration_date_label">Definir data de expiração</string>
@@ -1171,6 +1170,7 @@
     <string name="upload_cannot_create_file">Não foi possível criar o arquivo local</string>
     <string name="upload_chooser_title">Enviar de…</string>
     <string name="upload_content_from_other_apps">Enviar conteúdo de outros aplicativos</string>
+    <string name="upload_direct_camera_not_found">Nenhuma câmera encontrada</string>
     <string name="upload_direct_camera_photo">Foto</string>
     <string name="upload_direct_camera_promt">Deseja tirar uma foto ou gravar um vídeo?</string>
     <string name="upload_direct_camera_upload">Enviar da câmera</string>
@@ -1204,6 +1204,7 @@
     <string name="upload_old_android">A criptografia só é possível com Android &gt;= 5.0</string>
     <string name="upload_query_move_foreign_files">O espaço insuficiente está impedindo a cópia dos arquivos selecionados para a pasta %1$s. Em vez de copiá-los, gostaria de movê-los para lá?</string>
     <string name="upload_quota_exceeded">Cota de armazenamento excedida</string>
+    <string name="upload_quota_exceeded_notification_description">Sua cota de armazenamento está esgotada, por isso os envios foram interrompidos. Libere espaço ou solicite mais cota ao seu administrador e, em seguida, tente novamente os envios que falharam na seção “Uploads”.</string>
     <string name="upload_scan_doc_upload">Digitalizar documento com a câmera</string>
     <string name="upload_sync_conflict_check">Pode haver um conflito com o seu último envio. Toque para verificar.</string>
     <string name="upload_sync_conflict_check_error">Não foi possível verificar se há conflitos de upload. Tente novamente.</string>

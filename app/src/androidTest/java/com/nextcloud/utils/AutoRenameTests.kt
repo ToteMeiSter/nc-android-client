@@ -18,11 +18,10 @@ import com.owncloud.android.lib.resources.status.OCCapability
 import org.junit.Before
 import org.junit.Test
 
-@Suppress("TooManyFunctions")
 @SinceServer(majorVersion = 30)
 class AutoRenameTests : AbstractOnServerIT() {
 
-    private var capability: OCCapability = fileDataStorageManager.getCapability(account.name)
+    private var capability: OCCapability = storageManager.getCapability(account.name)
     private val forbiddenFilenameExtension = "."
     private val forbiddenFilenameCharacter = ">"
 

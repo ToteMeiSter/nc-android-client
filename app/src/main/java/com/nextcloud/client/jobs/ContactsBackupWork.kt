@@ -43,8 +43,8 @@ import java.io.IOException
 import java.io.InputStream
 import java.io.InputStreamReader
 import java.util.Calendar
+import kotlin.time.Duration.Companion.days
 
-@Suppress("LongParameterList") // legacy code
 class ContactsBackupWork(
     appContext: Context,
     params: WorkerParameters,
@@ -58,14 +58,13 @@ class ContactsBackupWork(
         val TAG = ContactsBackupWork::class.java.simpleName
         const val KEY_ACCOUNT = "account"
         const val KEY_FORCE = "force"
-        const val JOB_INTERVAL_MS: Long = 24L * 60L * 60L * 1000L
+        val JOB_INTERVAL_MS = 1.days.inWholeMilliseconds
         const val BUFFER_SIZE = 1024
     }
 
     private var operationsServiceConnection: OperationsServiceConnection? = null
     private var operationsServiceBinder: OperationsServiceBinder? = null
 
-    @Suppress("ReturnCount") // pre-existing issue
     override fun doWork(): Result {
         val accountName = inputData.getString(KEY_ACCOUNT) ?: ""
         if (TextUtils.isEmpty(accountName)) {

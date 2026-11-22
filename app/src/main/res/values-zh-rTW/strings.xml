@@ -343,6 +343,7 @@
     <string name="download_download_invalid_local_file_name">本機檔案有無效的檔案名稱</string>
     <string name="download_latest_dev_version">下載最新開發版本</string>
     <string name="download_limit">下載限制</string>
+    <string name="downloader_download_canceled">下載已取消</string>
     <string name="downloader_download_failed_content">無法下載 %1$s</string>
     <string name="downloader_download_failed_credentials_error">下載失敗，請重新登入</string>
     <string name="downloader_download_failed_ticker">下載失敗</string>
@@ -351,7 +352,6 @@
     <string name="downloader_download_in_progress_ticker">正在下載…</string>
     <string name="downloader_download_succeeded_content">%1$s 已下載</string>
     <string name="downloader_download_succeeded_ticker">已下載</string>
-    <string name="downloader_file_download_cancelled">某些檔案在下載期間被使用者取消</string>
     <string name="downloader_file_download_failed">下載檔案時發生錯誤</string>
     <string name="downloader_not_downloaded_yet">尚未下載</string>
     <string name="downloader_unexpected_error">下載檔案時發生了預料之外的錯誤</string>
@@ -397,11 +397,9 @@
     <string name="encryption_encrypt_unavailable">無法加密此資料夾。伺服器並未設定端到端加密。</string>
     <string name="encryption_key_checking_keys">正在檢查金鑰⋯⋯</string>
     <string name="encryption_key_handle_folder_read_only_description">此帳號的加密金鑰已被移除或更換，因此此資料夾的內容已無法解密。\n\n此資料夾從現在起將設為唯讀。若要再次使用加密資料夾，請備份此資料夾，並在設定中設定新的加密金鑰。</string>
-    <string name="encryption_key_handle_key_keys_only_on_device_description">儲存於此裝置上的加密金鑰已失效。該金鑰已從伺服器撤銷。 \n\n請從設定中移除本機加密，以建立新的加密資料夾。</string>
-    <string name="encryption_key_handle_key_keys_only_on_device_outdated_description">儲存於此裝置上的加密金鑰已失效。該金鑰已從伺服器撤銷。 \n\n請備份先前建立的加密資料夾。 \n\n接著，請在設定中移除本機加密，以便建立新的加密資料夾。</string>
     <string name="encryption_key_handle_key_removed_title">加密金鑰已變更</string>
+    <string name="encryption_key_handle_keys_changed_on_server_description">伺服器上的加密金鑰已被移除或取代，因此此裝置上的加密資料夾已變為唯讀。\n\n若要繼續使用端到端加密，請先備份您的已加密檔案，然後在設定中移除本機的加密，再重新設定。</string>
     <string name="encryption_key_handle_no_keys_description">無法開啟此資料夾，因為其加密金鑰已不在此裝置或伺服器上。</string>
-    <string name="encryption_key_handle_setup_new_key_before_encrypting_description">此帳號的加密金鑰已被移除或替換。\n\n在對資料夾進行加密之前，請先在設定中設定新的加密金鑰。</string>
     <string name="encryption_new_folder_check_failed">無法檢查您的加密金鑰。嘗試再次建立資料夾。</string>
     <string name="encryption_new_folder_no_network">無法連線至伺服器。嘗試稍後再次建立資料夾。</string>
     <string name="encryption_new_folder_unavailable">無法建立加密資料夾。伺服器並未設定端到端加密。</string>
@@ -410,8 +408,8 @@
     <string name="encryption_open_no_network">無法連線至伺服器。嘗試稍後再次開啟資料夾。</string>
     <string name="encryption_open_unavailable">無法開啟此資料夾。伺服器並未設定端到端加密。</string>
     <string name="end_to_end_encryption_certificate_unavailable">無法擷取伺服器憑證</string>
-    <string name="end_to_end_encryption_certificate_verification_failed">驗證公鑰失敗</string>
     <string name="end_to_end_encryption_confirm_button">設置加密</string>
+    <string name="end_to_end_encryption_could_not_verify_certificate">無法驗證加密憑證</string>
     <string name="end_to_end_encryption_decrypting">正在解密…</string>
     <string name="end_to_end_encryption_dialog_close">關閉</string>
     <string name="end_to_end_encryption_enter_passphrase_to_access_files">輸入您的密碼以存取您的檔案</string>
@@ -610,6 +608,7 @@
     <string name="foreign_files_remote_text">遠端：%1$s</string>
     <string name="forward">往前</string>
     <string name="fourHours">4 小時</string>
+    <string name="gallery_unsupported_file">不支援的檔案類型</string>
     <string name="governance_file_retention_label">保留檔案</string>
     <string name="governance_legal_hold_label">法律保留</string>
     <string name="governance_no_label">無</string>
@@ -982,6 +981,7 @@
     <string name="share_link_file_no_exist">無法分享。請確認檔案是否存在。</string>
     <string name="share_link_forbidden_permissions">分享此檔案</string>
     <string name="share_link_optional_password_title">請輸入密碼（選擇性）</string>
+    <string name="share_link_password_rejected">此密碼不符合密碼要求。請嘗試設定較長或更複雜的密碼。</string>
     <string name="share_link_password_title">請輸入密碼</string>
     <string name="share_link_with_label">分享連結 (%1$s)</string>
     <string name="share_no_expiration_date_label">設定到期日</string>
@@ -1171,6 +1171,7 @@
     <string name="upload_cannot_create_file">無法建立本機檔案</string>
     <string name="upload_chooser_title">上傳自…</string>
     <string name="upload_content_from_other_apps">從其他應用程式上傳</string>
+    <string name="upload_direct_camera_not_found">找不到相機</string>
     <string name="upload_direct_camera_photo">照片</string>
     <string name="upload_direct_camera_promt">您想要拍攝照片或影片？</string>
     <string name="upload_direct_camera_upload">從相機上傳</string>
@@ -1204,6 +1205,7 @@
     <string name="upload_old_android">加密功能僅適用於 Android 5.0 及後續版本</string>
     <string name="upload_query_move_foreign_files">空間不足以將選擇的檔案複製到 %1$s 資料夾。是否要改成移動它們？</string>
     <string name="upload_quota_exceeded">超過儲存空間容量限制</string>
+    <string name="upload_quota_exceeded_notification_description">您的儲存配額已滿，因此上傳作業已停止。請釋放空間或向系統管理員申請更多配額，然後從「上傳」頁面重新嘗試失敗的上傳作業。</string>
     <string name="upload_scan_doc_upload">使用相機掃描文件</string>
     <string name="upload_sync_conflict_check">您的上次上傳可能存在衝突。點擊檢查。</string>
     <string name="upload_sync_conflict_check_error">無法檢查上傳衝突。請重試。</string>

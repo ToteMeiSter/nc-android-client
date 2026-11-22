@@ -59,11 +59,11 @@ import com.owncloud.android.lib.common.operations.RemoteOperationResult
 import com.owncloud.android.lib.common.utils.Log_OC
 import com.owncloud.android.lib.resources.shares.OCShare
 import com.owncloud.android.lib.resources.shares.ShareType
-import com.owncloud.android.lib.resources.status.NextcloudVersion
 import com.owncloud.android.lib.resources.status.OCCapability
 import com.owncloud.android.operations.RefreshFolderOperation
 import com.owncloud.android.providers.UsersAndGroupsSearchConfig
 import com.owncloud.android.ui.activity.FileActivity
+import com.owncloud.android.ui.activity.fileactivity.ShareLinkHelper
 import com.owncloud.android.ui.adapter.ShareeListAdapter
 import com.owncloud.android.ui.adapter.ShareeListAdapterListener
 import com.owncloud.android.ui.asynctasks.RetrieveHoverCardAsyncTask
@@ -82,7 +82,7 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import javax.inject.Inject
 
-@Suppress("TooManyFunctions", "LargeClass", "TooGenericExceptionCaught", "ReturnCount")
+@Suppress("LargeClass")
 class FileDetailSharingFragment :
     Fragment(),
     ShareeListAdapterListener,
@@ -558,11 +558,12 @@ class FileDetailSharingFragment :
         }
 
         if (publicShare.shareLink.isNullOrEmpty()) {
-            fileOperationsHelper?.getFileWithLink(file, viewThemeUtils)
+            fileOperationsHelper?.getFileWithLink(file)
             return
         }
 
-        FileActivity.showShareLinkDialog(fileActivity, file, publicShare.shareLink)
+        val activity = fileActivity ?: return
+        ShareLinkHelper.showShareLinkDialog(activity, file, publicShare.shareLink)
     }
 
     private fun refreshLegacyShareUiFromDb() {
@@ -725,8 +726,10 @@ class FileDetailSharingFragment :
     }
 
     override fun sendLink(share: OCShare) {
-        if (file?.isSharedViaLink == true && !share.shareLink.isNullOrEmpty()) {
-            FileActivity.showShareLinkDialog(fileActivity, file, share.shareLink)
+        val currentFile = file
+        val activity = fileActivity
+        if (currentFile?.isSharedViaLink == true && !share.shareLink.isNullOrEmpty() && activity != null) {
+            ShareLinkHelper.showShareLinkDialog(activity, currentFile, share.shareLink)
         } else {
             showSendLinkTo(share)
         }
@@ -744,15 +747,17 @@ class FileDetailSharingFragment :
             return
         }
 
-        file?.let { FileActivity.showShareLinkDialog(fileActivity, file, createInternalLink(user, it, capabilities)) }
+        val currentFile = file ?: return
+        val activity = fileActivity ?: return
+        ShareLinkHelper.showShareLinkDialog(activity, currentFile, createInternalLink(user, currentFile, capabilities))
     }
 
-    private fun OCCapability?.isPasswordEnforced(): Boolean =
-        this?.filesSharingPublicPasswordEnforced?.isTrue == true &&
-            filesSharingPublicAskForOptionalPassword.isTrue
+    private fun OCCapability?.shouldAskForPublicLinkPassword(): Boolean =
+        this?.filesSharingPublicPasswordEnforced?.isTrue == true ||
+            this?.filesSharingPublicAskForOptionalPassword?.isTrue == true
 
     override fun createPublicShareLink() {
-        if (capabilities?.isPasswordEnforced() == true) {
+        if (capabilities.shouldAskForPublicLinkPassword()) {
             requestPasswordForShareViaLink(
                 true,
                 (capabilities?.filesSharingPublicAskForOptionalPassword?.isTrue == true)
@@ -775,7 +780,7 @@ class FileDetailSharingFragment :
         }
 
         if (share.shareLink.isNullOrEmpty()) {
-            fileOperationsHelper?.getFileWithLink(file, viewThemeUtils)
+            fileOperationsHelper?.getFileWithLink(file)
             return
         }
 
@@ -812,10 +817,6 @@ class FileDetailSharingFragment :
     }
 
     override fun showProfileBottomSheet(user: User, shareWith: String?) {
-        if (!user.server.version.isNewerOrEqual(NextcloudVersion.nextcloud_23)) {
-            return
-        }
-
         val userId = shareWith ?: return
         val activity = fileActivity ?: return
 
@@ -937,7 +938,7 @@ class FileDetailSharingFragment :
     // endregion
 
     interface OnEditShareListener {
-        fun editExistingShare(share: OCShare?, screenTypePermission: Int, isReshareShown: Boolean)
+        fun editExistingShare(share: OCShare, screenTypePermission: Int, isReshareShown: Boolean)
 
         fun onShareProcessClosed()
     }

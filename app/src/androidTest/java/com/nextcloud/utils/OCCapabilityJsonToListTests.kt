@@ -17,9 +17,9 @@ import junit.framework.TestCase.assertEquals
 import junit.framework.TestCase.assertTrue
 import org.junit.Test
 
-@Suppress("MagicNumber", "TooManyFunctions")
+@Suppress("MagicNumber")
 class OCCapabilityJsonToListTests : AbstractIT() {
-    private var capability: OCCapability = fileDataStorageManager.getCapability(account.name)
+    private var capability: OCCapability = storageManager.getCapability(account.name)
 
     // region Valid Input
     @Test

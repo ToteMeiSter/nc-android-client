@@ -343,6 +343,7 @@
     <string name="download_download_invalid_local_file_name">Ainm comhaid neamhbhailí don chomhad áitiúil</string>
     <string name="download_latest_dev_version">Íoslódáil an leagan is déanaí de dev</string>
     <string name="download_limit">Teorainn a íoslódáil</string>
+    <string name="downloader_download_canceled">Cealaíodh an íoslódáil</string>
     <string name="downloader_download_failed_content">Níorbh fhéidir %1$s a íoslódáil</string>
     <string name="downloader_download_failed_credentials_error">Theip ar an íoslódáil, logáil isteach arís</string>
     <string name="downloader_download_failed_ticker">Theip ar an íoslódáil</string>
@@ -351,7 +352,6 @@
     <string name="downloader_download_in_progress_ticker">Ag íosluchtú…</string>
     <string name="downloader_download_succeeded_content">%1$s íoslódáilte</string>
     <string name="downloader_download_succeeded_ticker">Íosluchtaithe</string>
-    <string name="downloader_file_download_cancelled">Cealaíodh comhaid áirithe le linn an íoslódála ag an úsáideoir</string>
     <string name="downloader_file_download_failed">Tharla earráid agus comhaid á n-íoslódáil</string>
     <string name="downloader_not_downloaded_yet">Gan íoslódáil fós</string>
     <string name="downloader_unexpected_error">Tharla earráid gan choinne agus comhaid á n-íoslódáil</string>
@@ -397,12 +397,8 @@
     <string name="encryption_encrypt_unavailable">Ní féidir an fillteán seo a chriptiú. Níl criptiú ó cheann ceann socraithe ar an bhfreastalaí seo.</string>
     <string name="encryption_key_checking_keys">Ag seiceáil eochracha…</string>
     <string name="encryption_key_handle_folder_read_only_description">Baineadh nó cuireadh eochracha criptithe an chuntais seo ina n-áit, mar sin ní féidir ábhar an fhillteáin seo a dhíchriptiú a thuilleadh.\n\nNíl an fillteán inléite ach amháin as seo amach. Chun fillteáin chriptithe a úsáid arís, déan cúltaca den fhillteán seo agus socraigh d\'eochair chriptithe nua sna socruithe.</string>
-    <string name="encryption_key_handle_key_keys_only_on_device_description">Níl an eochair chriptithe atá stóráilte ar an ngléas seo bailí a thuilleadh. Tá na heochracha cúlghairthe ón bhfreastalaí. \n\nBain an criptiú go háitiúil ó na socruithe chun fillteán criptithe nua a chruthú.</string>
-    <string name="encryption_key_handle_key_keys_only_on_device_outdated_description">Níl an eochair chriptithe atá stóráilte ar an ngléas seo bailí a thuilleadh. Tá na heochracha cúlghairthe ón bhfreastalaí. \n\nDéan cúltaca den fhillteán criptithe a cruthaíodh roimhe seo. \n\nAnsin bain an criptiú go háitiúil ó na socruithe chun fillteán criptithe nua a chruthú.</string>
     <string name="encryption_key_handle_key_removed_title">Eochracha criptithe athraithe</string>
     <string name="encryption_key_handle_no_keys_description">Ní féidir an fillteán seo a oscailt mar níl a eochracha criptithe ann a thuilleadh ar an ngléas seo ná ar an bhfreastalaí.</string>
-    <string name="encryption_key_handle_setup_new_key_before_encrypting_description">Baineadh nó cuireadh eochracha criptithe an chuntais seo ina n-áit.\n\nSocraigh d\'eochair chriptithe nua sna socruithe sula ndéanann tú fillteán a chriptiú.
-</string>
     <string name="encryption_new_folder_check_failed">Níorbh fhéidir d’eochracha criptithe a sheiceáil. Déan iarracht an fillteán a chruthú arís.</string>
     <string name="encryption_new_folder_no_network">Ní féidir teacht ar an bhfreastalaí. Déan iarracht an fillteán a chruthú arís níos déanaí.</string>
     <string name="encryption_new_folder_unavailable">Ní féidir fillteáin chriptithe a chruthú. Níl criptiú ó cheann ceann socraithe ar an bhfreastalaí seo.</string>
@@ -411,7 +407,6 @@
     <string name="encryption_open_no_network">Ní féidir teacht ar an bhfreastalaí. Déan iarracht an fillteán a oscailt arís níos déanaí.</string>
     <string name="encryption_open_unavailable">Ní féidir an fillteán seo a oscailt. Níl criptiú ó cheann ceann socraithe ar an bhfreastalaí seo.</string>
     <string name="end_to_end_encryption_certificate_unavailable">Ní féidir teastas an fhreastalaí a fháil</string>
-    <string name="end_to_end_encryption_certificate_verification_failed">Theip ar an eochair phoiblí a fhíorú</string>
     <string name="end_to_end_encryption_confirm_button">Socraigh criptiú</string>
     <string name="end_to_end_encryption_decrypting">Ag díchriptiú…</string>
     <string name="end_to_end_encryption_dialog_close">Dún</string>
@@ -611,6 +606,7 @@
     <string name="foreign_files_remote_text">Cianda: %1$s</string>
     <string name="forward">Ar aghaidh</string>
     <string name="fourHours">4 uair an chloig</string>
+    <string name="gallery_unsupported_file">Cineál comhaid nach dtacaítear leis</string>
     <string name="governance_file_retention_label">Coinneáil comhad</string>
     <string name="governance_legal_hold_label">Sealbh dlíthiúil</string>
     <string name="governance_no_label">aon cheann</string>
@@ -923,6 +919,7 @@
     <string name="retrieving_file">Comhad á aisghabháil…</string>
     <string name="retry">Bain triail eile as</string>
     <string name="richdocuments_failed_to_load_document">Theip ar an doiciméad a lódáil!</string>
+    <string name="run_two_way_sync">Rith an sioncronú anois</string>
     <string name="scanQR_description">Logáil isteach trí chód QR</string>
     <string name="scan_page">Scan leathanach</string>
     <string name="screenshot_01_gridView_heading">Ag cosaint do shonraí</string>
@@ -982,6 +979,7 @@
     <string name="share_link_file_no_exist">Ní féidir a roinnt. Seiceáil an bhfuil an comhad ann le do thoil.</string>
     <string name="share_link_forbidden_permissions">chun an comhad seo a roinnt</string>
     <string name="share_link_optional_password_title">Cuir isteach pasfhocal roghnach</string>
+    <string name="share_link_password_rejected">Ní chomhlíonann an focal faire na riachtanais. Bain triail as focal faire atá níos faide nó níos casta.</string>
     <string name="share_link_password_title">Cuir isteach pasfhocal</string>
     <string name="share_link_with_label">Comhroinn nasc (%1$s)</string>
     <string name="share_no_expiration_date_label">Socraigh dáta éaga</string>
@@ -1171,6 +1169,7 @@
     <string name="upload_cannot_create_file">Ní féidir comhad áitiúil a chruthú</string>
     <string name="upload_chooser_title">Uaslódáil ó…</string>
     <string name="upload_content_from_other_apps">Uaslódáil ábhar ó apps eile</string>
+    <string name="upload_direct_camera_not_found">Níor aimsíodh aon cheamara</string>
     <string name="upload_direct_camera_photo">Grianghraf</string>
     <string name="upload_direct_camera_promt">Ar mhaith leat grianghraf nó físeán a ghlacadh?</string>
     <string name="upload_direct_camera_upload">Íosluchtaigh ó ceamara</string>
@@ -1204,6 +1203,7 @@
     <string name="upload_old_android">Ní féidir criptiúchán ach amháin le 1&gt;= Android 5.0</string>
     <string name="upload_query_move_foreign_files">Ní bheidh dóthain spáis ann na comhaid roghnaithe a chóipeáil isteach san fhillteán %1$s. Ar mhaith leat iad a bhogadh ansin ina n-ionad?</string>
     <string name="upload_quota_exceeded">Sáraíodh an cuóta stórála</string>
+    <string name="upload_quota_exceeded_notification_description">Tá do chuóta stórála lán, mar sin cuireadh stop le h-uaslódálacha. Saor spás nó iarr tuilleadh cuóta ar do riarthóir, agus ansin déan iarracht arís ar na huaslódálacha nár éirigh leo ón rannán Uaslódálacha.</string>
     <string name="upload_scan_doc_upload">Doiciméad a scanadh ó ceamara</string>
     <string name="upload_sync_conflict_check">B’fhéidir go bhfuil coimhlint ann idir é agus an uaslódáil dheireanach a rinne tú. Tapáil le seiceáil.</string>
     <string name="upload_sync_conflict_check_error">Níorbh fhéidir seiceáil le haghaidh coinbhleachtaí uaslódála. Déan iarracht arís.</string>

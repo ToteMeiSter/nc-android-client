@@ -13,7 +13,7 @@ import com.nextcloud.client.assistant.model.AssistantScreenState
 import com.nextcloud.client.assistant.model.ScreenOverlayState
 import com.nextcloud.client.assistant.repository.local.AssistantLocalRepository
 import com.nextcloud.client.assistant.repository.remote.AssistantRemoteRepository
-import com.nextcloud.utils.TimeConstants.MILLIS_PER_SECOND
+import com.nextcloud.utils.AppConstants.MILLIS_PER_SECOND
 import com.owncloud.android.R
 import com.owncloud.android.lib.common.utils.Log_OC
 import com.owncloud.android.lib.resources.assistant.v2.model.Task
@@ -28,7 +28,6 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 
-@Suppress("TooManyFunctions")
 class AssistantViewModel(
     private val accountName: String,
     private val remoteRepository: AssistantRemoteRepository,
@@ -200,23 +199,21 @@ class AssistantViewModel(
     }
 
     fun fetchTaskList() = viewModelScope.launch(Dispatchers.IO) {
-        val taskType = _selectedTaskType.value ?: return@launch
+        val taskTypeId = _selectedTaskType.value?.id ?: return@launch
 
-        val cached = localRepository.getCachedTasks(accountName, taskType.name)
+        val cached = localRepository.getCachedTasks(accountName, taskTypeId)
         if (cached.isNotEmpty()) {
             _filteredTaskList.update {
                 cached.sortedByDescending { it.id }
             }
         }
 
-        taskType.id?.let { typeId ->
-            remoteRepository.getTaskList(typeId)?.let { result ->
-                taskList = result
-                _filteredTaskList.value = result.sortedByDescending { it.id }
-                localRepository.cacheTasks(result, accountName)
-                updateSnackbarMessage(null)
-            } ?: updateSnackbarMessage(R.string.assistant_screen_task_list_error_state_message)
-        }
+        remoteRepository.getTaskList(taskTypeId)?.let { result ->
+            taskList = result
+            _filteredTaskList.value = result.sortedByDescending { it.id }
+            localRepository.cacheTasks(result, accountName)
+            updateSnackbarMessage(null)
+        } ?: updateSnackbarMessage(R.string.assistant_screen_task_list_error_state_message)
     }
 
     fun deleteTask(id: Long) = viewModelScope.launch(Dispatchers.IO) {
@@ -229,10 +226,10 @@ class AssistantViewModel(
 
         updateSnackbarMessage(message)
 
-        val taskType = _selectedTaskType.value ?: return@launch
+        val taskTypeId = _selectedTaskType.value?.id ?: return@launch
         if (result.isSuccess) {
             removeTaskFromList(id)
-            localRepository.deleteTask(id, accountName, taskType.name)
+            localRepository.deleteTask(id, accountName, taskTypeId)
         }
     }
     // endregion

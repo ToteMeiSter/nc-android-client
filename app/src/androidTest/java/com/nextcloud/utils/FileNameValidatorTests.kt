@@ -21,13 +21,12 @@ import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Test
 
-@Suppress("TooManyFunctions")
 class FileNameValidatorTests : AbstractOnServerIT() {
     companion object {
         private const val MAX_FILENAME_SIZE = 250
     }
 
-    private var capability: OCCapability = fileDataStorageManager.getCapability(account.name)
+    private var capability: OCCapability = storageManager.getCapability(account.name)
 
     @Before
     fun setup() {

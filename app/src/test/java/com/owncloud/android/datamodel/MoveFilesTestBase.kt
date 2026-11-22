@@ -29,7 +29,7 @@ import io.mockk.unmockkAll
 import org.junit.After
 import org.junit.Before
 
-@Suppress("LongParameterList", "TooManyFunctions", "DEPRECATION")
+@Suppress("DEPRECATION")
 abstract class MoveFilesTestBase {
 
     companion object {
@@ -50,7 +50,7 @@ abstract class MoveFilesTestBase {
         mockUser = mockk(relaxed = true)
         every { mockUser.accountName } returns ACCOUNT_NAME
 
-        mockkStatic(MainApp::class)
+        mockkObject(MainApp)
         every { MainApp.getAppContext() } returns mockk(relaxed = true)
 
         val mockDb = mockk<NextcloudDatabase>(relaxed = true)

@@ -83,7 +83,6 @@ import java.util.Date
 import java.util.Locale
 import java.util.UUID
 
-@Suppress("LongParameterList", "TooManyFunctions")
 class OCFileListAdapter(
     private val activity: Activity,
     private var user: User,
@@ -92,7 +91,7 @@ class OCFileListAdapter(
     transferServiceGetter: ComponentsGetter,
     ocFileListFragmentInterface: OCFileListFragmentInterface,
     private val hideItemOptions: Boolean,
-    private var gridView: Boolean,
+    gridView: Boolean,
     viewThemeUtils: ViewThemeUtils,
     private val thumbnailGenerator: ThumbnailGenerator,
     avatarGenerator: AvatarGenerator
@@ -209,7 +208,7 @@ class OCFileListAdapter(
 
             OCFileListViewType.HEADER -> OCFileListHeaderViewHolder(ListHeaderBinding.inflate(inflater, parent, false))
 
-            OCFileListViewType.ITEM, OCFileListViewType.IMAGE -> if (gridView) {
+            OCFileListViewType.ITEM, OCFileListViewType.IMAGE -> if (ocFileListDelegate.gridView) {
                 OCFileListGridItemViewHolder(GridItemBinding.inflate(inflater, parent, false))
             } else {
                 OCFileListItemViewHolder(ListItemBinding.inflate(inflater, parent, false))
@@ -280,7 +279,8 @@ class OCFileListAdapter(
         directory: OCFile,
         storageManager: FileDataStorageManager,
         onlyOnDevice: Boolean,
-        mLimitToMimeType: String
+        mLimitToMimeType: String,
+        onSwapped: () -> Unit
     ) {
         this.onlyOnDevice = onlyOnDevice
 
@@ -301,7 +301,7 @@ class OCFileListAdapter(
             preferences,
             accountUserId
         ) { newList, _ ->
-            updateAdapter(newList, directory)
+            updateAdapter(newList, directory, onSwapped)
         }
     }
 
@@ -382,14 +382,14 @@ class OCFileListAdapter(
 
     fun shouldShowHeader(): Boolean {
         val directory = currentDirectory
-        return !(directory == null || MainApp.isOnlyOnDevice()) && (
+        return !(directory == null || MainApp.isOnlyOnDevice) && (
             shouldShowRecommendedFiles() ||
                 headerBinder.shouldShowOpenInNotes(directory) ||
                 headerBinder.hasRichWorkspace(directory)
             )
     }
 
-    fun updateAdapter(newFiles: List<OCFile>, directory: OCFile?) {
+    fun updateAdapter(newFiles: List<OCFile>, directory: OCFile?, onUpdated: () -> Unit = {}) {
         Log_OC.d(TAG, "updating the adapter")
 
         allFiles.clear()
@@ -409,8 +409,10 @@ class OCFileListAdapter(
             if (isSameDirectoryRefresh) {
                 differ.submitAndRebind(files)
             } else {
-                differ.replace(files)
+                differ.replaceWithoutAnimation(files)
             }
+
+            onUpdated()
         }
     }
 
@@ -555,6 +557,13 @@ class OCFileListAdapter(
         file?.let { notifyItemChangedIfPresent(it, iconId) }
     }
 
+    fun updateFileIndicator(fileId: Long, iconId: Int) {
+        val index = files.indexOfFirst { it.fileId == fileId }
+        if (index != RecyclerView.NO_POSITION) {
+            notifyItemChanged(index + differ.headerOffset(), iconId)
+        }
+    }
+
     @SuppressLint("NotifyDataSetChanged")
     fun updateRecommendedFiles(value: List<OCFile>) {
         recommendedFiles.clear()
@@ -564,7 +573,7 @@ class OCFileListAdapter(
     }
 
     fun setGridView(bool: Boolean) {
-        gridView = bool
+        ocFileListDelegate.gridView = bool
     }
 
     fun setShowMetadata(bool: Boolean) {
@@ -613,7 +622,7 @@ class OCFileListAdapter(
     }
 
     private fun bindFile(holder: ListViewHolder, file: OCFile) {
-        ocFileListDelegate.bindViewHolder(holder, file, currentDirectory, searchType, thumbnailGenerator)
+        ocFileListDelegate.bindViewHolder(holder, file, currentDirectory, thumbnailGenerator)
 
         if (holder is ListItemViewHolder) {
             itemBinder.bindDetails(holder, file, user, storageManager, shouldShowItemOptions(), onlyOnDevice)
@@ -633,7 +642,7 @@ class OCFileListAdapter(
         holder.fileFeaturesLayout?.setVisibleIf(holder.hasVisibleFeatureIndicators)
     }
 
-    private fun shouldShowItemOptions(): Boolean = !(isMultiSelect() || gridView || hideItemOptions)
+    private fun shouldShowItemOptions(): Boolean = !(isMultiSelect() || ocFileListDelegate.gridView || hideItemOptions)
 
     private fun bindMoreOptionsVisibility(holder: ListViewHolder) {
         val showMoreOptions = !isMultiSelect() && !OCFileListFragment.isMultipleFileSelectedForCopyOrMove

@@ -58,7 +58,6 @@ import java.util.concurrent.ConcurrentHashMap
 import kotlin.random.Random
 import kotlin.time.Duration.Companion.milliseconds
 
-@Suppress("LongParameterList", "TooGenericExceptionCaught")
 class FileUploadWorker(
     val uploadsStorageManager: UploadsStorageManager,
     val connectivityService: ConnectivityService,
@@ -242,7 +241,7 @@ class FileUploadWorker(
         }
     }
 
-    @Suppress("ReturnCount", "LongMethod", "DEPRECATION")
+    @Suppress("LongMethod", "DEPRECATION", "CyclomaticComplexMethod")
     private suspend fun uploadFiles(): Result = withContext(Dispatchers.IO) {
         val accountName = inputData.getString(ACCOUNT)
         if (accountName == null) {
@@ -350,8 +349,9 @@ class FileUploadWorker(
             // check quota first
             if (result.code == ResultCode.QUOTA_EXCEEDED) {
                 Log_OC.w(TAG, "Quota exceeded, stopping uploads")
-                notificationManager.showQuotaExceedNotification(operation)
-                break
+                uploadsStorageManager.markInProgressUploadsAsQuotaExceeded(accountName)
+                fileUploadEventBroadcaster.sendUploadCompleted(operation, result, context)
+                return@withContext Result.failure()
             }
 
             if (!result.isSuccess && !result.code.isUserCancellation()) {
@@ -386,7 +386,6 @@ class FileUploadWorker(
         else -> false
     }
 
-    @Suppress("ReturnCount")
     suspend fun isBelongToAnySyncedFolder(
         upload: OCUpload,
         syncFolderHelper: SyncFolderHelper,
@@ -436,7 +435,7 @@ class FileUploadWorker(
         return result
     }
 
-    @Suppress("TooGenericExceptionCaught", "DEPRECATION")
+    @Suppress("DEPRECATION")
     private suspend fun upload(
         operation: UploadFileOperation,
         user: User,

@@ -17,7 +17,7 @@ concurrency:
 
 jobs:
     test:
-        runs-on: ubuntu-24.04
+        runs-on: ubuntu-26.04
         services:
             server:
                 image: ${{ matrix.server == 'stable22' && 'ghcr.io/nextcloud/continuous-integration-shallow-server-php8.0:1' || 'ghcr.io/nextcloud/continuous-integration-shallow-server-php8.3:latest' }}
@@ -32,9 +32,15 @@ jobs:
         steps:
             -   uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
 
+            -   name: Free disk space
+                run: |
+                    df -h /
+                    sudo rm -rf /usr/share/dotnet /usr/share/swift /usr/local/.ghcup /opt/ghc /usr/local/share/boost /usr/local/share/powershell /usr/local/share/chromium /usr/local/julia* /opt/az /opt/microsoft /opt/google
+                    df -h /
+
             -   name: configure server
                 run: |
-                    sudo apt-get update && sudo apt-get install unzip cpu-checker qemu-kvm --yes
+                    sudo apt-get update && sudo apt-get install unzip cpu-checker qemu-system-x86 --yes
                     sudo chmod 666 /dev/kvm
                     docker cp .github/workflows/configServer.sh server:/tmp/
                     docker exec server chmod +x /tmp/configServer.sh
@@ -43,25 +49,25 @@ jobs:
                     docker exec server chmod +x /tmp/configNC.sh
                     docker exec --user www-data server /tmp/configNC.sh ${{ matrix.server }}
                     docker exec server /usr/local/bin/run.sh
+                    sudo apt-get clean
 
             -   name: set up JDK 21
-                uses: actions/setup-java@de7274f081f381c8f8158605e0321c36c376e2e6 # v6.0.1
+                uses: actions/setup-java@d1374f8ac74474200d16ef8ecee22c7ae7a51880 # v6.3.0
                 with:
                     distribution: "temurin"
                     java-version: 21
 
-            -   name: Enable KVM group perms
-                run: |
-                    echo 'KERNEL=="kvm", GROUP="kvm", MODE="0666", OPTIONS+="static_node=kvm"' | sudo tee /etc/udev/rules.d/99-kvm4all.rules
-                    sudo udevadm control --reload-rules
-                    sudo udevadm trigger --name-match=kvm
+            -   name: Setup Gradle
+                uses: gradle/actions/setup-gradle@8da46b539cd8fe6ab27ca75128919a18d757604c # v6.4.1
 
             -   name: Configure gradle daemon
                 run: |
                     mkdir -p $HOME/.gradle
-                    echo "org.gradle.jvmargs=-Xmx6g -XX:+HeapDumpOnOutOfMemoryError -Dfile.encoding=UTF-8 -XX:+UseParallelGC -XX:MaxMetaspaceSize=1g" >> $HOME/.gradle/gradle.properties
-                    echo "org.gradle.caching=true" >> $HOME/.gradle/gradle.properties
-                    echo "org.gradle.parallel=true" >> $HOME/.gradle/gradle.properties
+                    echo "org.gradle.jvmargs=-Xmx4g -XX:MaxMetaspaceSize=768m -XX:+UseSerialGC -Dfile.encoding=UTF-8 --add-opens java.base/java.nio=ALL-UNNAMED --add-opens java.base/java.nio.channels=ALL-UNNAMED --add-exports java.base/sun.nio.ch=ALL-UNNAMED" >> $HOME/.gradle/gradle.properties
+                    echo "kotlin.compiler.execution.strategy=in-process" >> $HOME/.gradle/gradle.properties
+                    echo "org.gradle.workers.max=4" >> $HOME/.gradle/gradle.properties
+                    echo "org.gradle.caching=false" >> $HOME/.gradle/gradle.properties
+                    echo "org.gradle.parallel=false" >> $HOME/.gradle/gradle.properties
                     echo "org.gradle.configureondemand=true" >> $HOME/.gradle/gradle.properties
 
             -   name: Config gplay
@@ -86,6 +92,8 @@ jobs:
                     force-avd-creation: false
                     arch: x86_64
                     sdcard-path-or-size: 100M
+                    ram-size: 4096M
+                    heap-size: 512M
                     target: google_apis
                     emulator-options: -no-metrics -no-window -gpu swiftshader_indirect -no-snapshot -noaudio -no-boot-anim -skin 500x833
                     script: scripts/runCombinedTest.sh ${{github.event.number}} ${{ secrets.LOG_USERNAME }} ${{ secrets.LOG_PASSWORD }} ${{github.event.number}} ${{ matrix.server }}

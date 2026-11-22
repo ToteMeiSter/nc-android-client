@@ -293,7 +293,6 @@
     <string name="downloader_download_in_progress_ticker">چۈشۈرۈش…</string>
     <string name="downloader_download_succeeded_content">%1$s چۈشۈرۈلدى</string>
     <string name="downloader_download_succeeded_ticker">چۈشۈرۈلدى</string>
-    <string name="downloader_file_download_cancelled">ئىشلەتكۈچى چۈشۈرۈش جەريانىدا بەزى ھۆججەتلەر ئەمەلدىن قالدۇرۇلدى</string>
     <string name="downloader_file_download_failed">ھۆججەتلەرنى چۈشۈرۈش جەريانىدا خاتالىق كۆرۈلدى</string>
     <string name="downloader_not_downloaded_yet">تېخى چۈشۈرۈلمىدى</string>
     <string name="downloader_unexpected_error">ھۆججەتلەرنى چۈشۈرگەندە كۈتۈلمىگەن خاتالىق يۈز بەردى</string>
@@ -332,7 +331,6 @@
     <string name="email_pick_failed">ئېلېكترونلۇق خەت ئادرېسىنى تاللىيالمىدى.</string>
     <string name="encrypted">شىفىرلانغان قىلىپ تەڭشەڭ</string>
     <string name="end_to_end_encryption_certificate_unavailable">مۇلازىمېتىر گۇۋاھنامىسىنى چۈشۈرەلمىدى</string>
-    <string name="end_to_end_encryption_certificate_verification_failed">ئاممىۋى ئاچقۇچنى دەلىللىيەلمىدى</string>
     <string name="end_to_end_encryption_confirm_button">مەخپىيلەشتۈرۈشنى تەڭشەڭ</string>
     <string name="end_to_end_encryption_decrypting">شىفىرلاش…</string>
     <string name="end_to_end_encryption_dialog_close">تاقاش</string>

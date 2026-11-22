@@ -39,7 +39,7 @@ class E2ECertificateRenewalService(
     private val mainHandler = Handler(Looper.getMainLooper())
 
     fun getCertificateValidity(user: User): E2ECertificateValidity? {
-        val certificate = arbitraryDataProvider.getValue(user.accountName, EncryptionUtils.PUBLIC_KEY)
+        val certificate = arbitraryDataProvider.getValue(user.accountName, EncryptionUtils.CERTIFICATE)
         if (certificate.isEmpty()) {
             return null
         }
@@ -75,7 +75,6 @@ class E2ECertificateRenewalService(
         }.start()
     }
 
-    @Suppress("ReturnCount")
     private fun renew(context: Context, user: User): E2ECertificateRenewalResult {
         val keyPair = reconstructKeyPair(user)
             ?: return E2ECertificateRenewalResult.Failure(R.string.renew_e2e_certificate_private_key_missing)
@@ -103,7 +102,7 @@ class E2ECertificateRenewalService(
             return E2ECertificateRenewalResult.Failure(R.string.renew_e2e_certificate_error)
         }
 
-        arbitraryDataProvider.storeOrUpdateKeyValue(user.accountName, EncryptionUtils.PUBLIC_KEY, renewedCertificate)
+        arbitraryDataProvider.storeOrUpdateKeyValue(user.accountName, EncryptionUtils.CERTIFICATE, renewedCertificate)
         Log_OC.i(TAG, "E2E certificate renewed successfully for " + user.accountName)
 
         return E2ECertificateRenewalResult.Success
@@ -117,7 +116,7 @@ class E2ECertificateRenewalService(
 
     private fun reconstructKeyPair(user: User): KeyPair? {
         val privateKeyString = arbitraryDataProvider.getValue(user.accountName, EncryptionUtils.PRIVATE_KEY)
-        val certificate = arbitraryDataProvider.getValue(user.accountName, EncryptionUtils.PUBLIC_KEY)
+        val certificate = arbitraryDataProvider.getValue(user.accountName, EncryptionUtils.CERTIFICATE)
         if (privateKeyString.isEmpty() || certificate.isEmpty()) {
             return null
         }

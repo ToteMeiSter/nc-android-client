@@ -246,7 +246,6 @@
     <string name="downloader_download_in_progress_ticker">Descargando…</string>
     <string name="downloader_download_succeeded_content">%1$s descargado</string>
     <string name="downloader_download_succeeded_ticker">Descargado</string>
-    <string name="downloader_file_download_cancelled">Algunos archivos fueron cancelados durante la descarga por el usuario</string>
     <string name="downloader_file_download_failed">Ocurrió un error al descargar los archivos</string>
     <string name="downloader_not_downloaded_yet">Aún no ha descargado</string>
     <string name="downloader_unexpected_error">Ocurrió un error inesperado mientras se descargaban los archivos</string>
@@ -281,7 +280,6 @@
     <string name="email_pick_failed">No se ha podido seleccionar la dirección de correo electrónico.</string>
     <string name="encrypted">Establecer como encriptado</string>
     <string name="end_to_end_encryption_certificate_unavailable">No fue posible recuperar el certificado del servidor</string>
-    <string name="end_to_end_encryption_certificate_verification_failed">Fallo al verificar la clave pública</string>
     <string name="end_to_end_encryption_confirm_button">Configurar la encripción</string>
     <string name="end_to_end_encryption_decrypting">Desencriptando…</string>
     <string name="end_to_end_encryption_dialog_close">Cerrar</string>

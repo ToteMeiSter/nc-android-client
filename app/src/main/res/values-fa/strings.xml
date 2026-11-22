@@ -313,7 +313,6 @@
     <string name="downloader_download_in_progress_ticker">بارگیری…</string>
     <string name="downloader_download_succeeded_content">%1$s بارگیری شد</string>
     <string name="downloader_download_succeeded_ticker">دانلود شده</string>
-    <string name="downloader_file_download_cancelled">برخی از فایل‌ها در حین دانلود توسط کاربر لغو شدند.</string>
     <string name="downloader_file_download_failed">خطا در هنگام دانلود فایل‌ها</string>
     <string name="downloader_not_downloaded_yet">دانلود هنوز به پایان نرسیده است.</string>
     <string name="downloader_unexpected_error">خطای غیرمنتظره در حین دانلود فایل‌ها</string>
@@ -353,7 +352,6 @@
     <string name="email_pick_failed">خطا در دریافت نشانی ایمیل</string>
     <string name="encrypted">به صورت رمزگذاری‌شده تنظیم شده است</string>
     <string name="end_to_end_encryption_certificate_unavailable">دریافت گواهی سرور ممکن نیست</string>
-    <string name="end_to_end_encryption_certificate_verification_failed">تأیید کلید عمومی انجام نشد</string>
     <string name="end_to_end_encryption_confirm_button">تنظیم رمزگذاری</string>
     <string name="end_to_end_encryption_decrypting">رمزگشایی...</string>
     <string name="end_to_end_encryption_dialog_close">بستن</string>

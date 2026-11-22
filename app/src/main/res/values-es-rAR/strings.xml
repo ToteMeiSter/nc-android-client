@@ -235,7 +235,6 @@
     <string name="downloader_download_in_progress_ticker">Descargando…</string>
     <string name="downloader_download_succeeded_content">%1$s descargado</string>
     <string name="downloader_download_succeeded_ticker">Descargado</string>
-    <string name="downloader_file_download_cancelled">Ciertos archivos fueron cancelados durante la descarga por el usuario</string>
     <string name="downloader_file_download_failed">Ocurrió un error al descargar los archivos</string>
     <string name="downloader_not_downloaded_yet">Aún no ha descargado</string>
     <string name="downloader_unexpected_error">Ocurrió un error inesperado mientras se descargaban los archivos</string>
@@ -719,6 +718,7 @@
     <string name="shared_with_you_by">Compartido contigo por %1$s</string>
     <string name="sharee_add_failed">No se pudo agregar el archivo compartido</string>
     <string name="sharee_already_added_to_file">Error al añadir el recurso compartido. Este archivo o carpeta ya se ha compartido con esta persona o grupo.</string>
+    <string name="show_all">Mostrar todo</string>
     <string name="show_images">Mostrar fotos</string>
     <string name="show_video">Mostrar videos</string>
     <string name="signup_with_provider">Registrarse con el proveedor</string>

@@ -319,7 +319,6 @@
     <string name="downloader_download_in_progress_ticker">Звантаження…</string>
     <string name="downloader_download_succeeded_content">%1$s звантажено</string>
     <string name="downloader_download_succeeded_ticker">Звантажено</string>
-    <string name="downloader_file_download_cancelled">Окремі файли було скасовано під час звантаження користувачем</string>
     <string name="downloader_file_download_failed">Помилка під час звантаження файлів</string>
     <string name="downloader_not_downloaded_yet">Ще не звантажено</string>
     <string name="downloader_unexpected_error">Неочікувана помилка під час звантаження файлів</string>
@@ -359,7 +358,6 @@
     <string name="email_pick_failed">Не вдалося вибрати ел. адресу.</string>
     <string name="encrypted">Позначити як зашифроване</string>
     <string name="end_to_end_encryption_certificate_unavailable">Неможливо отримати сертифікат сервера</string>
-    <string name="end_to_end_encryption_certificate_verification_failed">Не вдалося перевірити публічний ключ</string>
     <string name="end_to_end_encryption_confirm_button">Налаштування шифрування</string>
     <string name="end_to_end_encryption_decrypting">Розшифровування...</string>
     <string name="end_to_end_encryption_dialog_close">Закрити</string>

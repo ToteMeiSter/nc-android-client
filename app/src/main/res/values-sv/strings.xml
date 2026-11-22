@@ -93,7 +93,7 @@
     <string name="assistant_task_status_successful">lyckades</string>
     <string name="assistant_task_status_text">Uppgiftsstatus: %1$s</string>
     <string name="assistant_task_status_unknown">okänt</string>
-    <string name="assistant_thinking">Tänker …</string>
+    <string name="assistant_thinking">Tänker …</string>
     <string name="associated_account_not_found">Det associerade kontot hittades inte!</string>
     <string name="auth_access_failed">Åtkomst misslyckades: %1$s</string>
     <string name="auth_account_does_not_exist">Kontot har ännu inte lagts till på den här enheten</string>
@@ -185,7 +185,7 @@
     <string name="check_back_later_or_reload">Återkom senare eller ladda om</string>
     <string name="checkbox">Kryssruta</string>
     <string name="choose_local_folder">Välj lokal mapp…</string>
-    <string name="choose_remote_folder">Välj fjärrmapp…</string>
+    <string name="choose_remote_folder">Välj fjärrmapp …</string>
     <string name="choose_template_helper_text">Välj en mall och ange ett filnamn.</string>
     <string name="choose_which_file">Välj vilken fil du vill behålla!</string>
     <string name="choose_widget">Välj widget</string>
@@ -343,6 +343,7 @@
     <string name="download_download_invalid_local_file_name">Ogiltigt filnamn för lokal fil</string>
     <string name="download_latest_dev_version">Hämta senaste utvecklingsversionen</string>
     <string name="download_limit">Hämtningsbegränsning</string>
+    <string name="downloader_download_canceled">Nedladdning avbruten</string>
     <string name="downloader_download_failed_content">Kunde inte hämta %1$s</string>
     <string name="downloader_download_failed_credentials_error">Hämtningen misslyckades, logga in igen</string>
     <string name="downloader_download_failed_ticker">Hämtning misslyckades</string>
@@ -351,7 +352,6 @@
     <string name="downloader_download_in_progress_ticker">Hämtar…</string>
     <string name="downloader_download_succeeded_content">%1$s hämtad</string>
     <string name="downloader_download_succeeded_ticker">Hämtad</string>
-    <string name="downloader_file_download_cancelled">Vissa filhämtningar avbröts av användaren</string>
     <string name="downloader_file_download_failed">Ett fel uppstod när filer hämtades</string>
     <string name="downloader_not_downloaded_yet">Ännu inte hämtade</string>
     <string name="downloader_unexpected_error">Oväntat fel inträffade vid nedladdning av filer</string>
@@ -397,11 +397,8 @@
     <string name="encryption_encrypt_unavailable">Det går inte att kryptera den här mappen. End-to-end-kryptering är inte konfigurerad på den här servern.</string>
     <string name="encryption_key_checking_keys">Kontrollerar nycklar…</string>
     <string name="encryption_key_handle_folder_read_only_description">Krypteringsnycklarna för det här kontot har tagits bort eller ersatts, så innehållet i den här mappen kan inte längre dekrypteras.\n\nMappen är skrivskyddad från och med nu. Säkerhetskopiera mappen och konfigurera din nya krypteringsnyckel i inställningarna för att använda krypterade mappar igen.</string>
-    <string name="encryption_key_handle_key_keys_only_on_device_description">Krypteringsnyckeln som lagras på den här enheten är inte längre giltig. Nycklar har återkallats från servern. \n\nTa bort krypteringen lokalt i inställningarna för att skapa en ny krypterad mapp.</string>
-    <string name="encryption_key_handle_key_keys_only_on_device_outdated_description">Krypteringsnyckeln som lagras på den här enheten är inte längre giltig. Nycklar har återkallats från servern. \n\nSäkerhetskopiera den tidigare skapade krypterade mappen. \n\nTa sedan bort krypteringen lokalt i inställningarna för att skapa en ny krypterad mapp.</string>
     <string name="encryption_key_handle_key_removed_title">Krypteringsnycklar ändrades</string>
     <string name="encryption_key_handle_no_keys_description">Den här mappen kan inte öppnas eftersom dess krypteringsnycklar inte längre finns på den här enheten eller på servern.</string>
-    <string name="encryption_key_handle_setup_new_key_before_encrypting_description">Krypteringsnycklarna för det här kontot har tagits bort eller ersatts.\n\nKonfigurera din nya krypteringsnyckel i inställningarna innan du krypterar en mapp.</string>
     <string name="encryption_new_folder_check_failed">Det gick inte att kontrollera dina krypteringsnycklar. Försök skapa mappen igen.</string>
     <string name="encryption_new_folder_no_network">Det går inte att nå servern. Försök skapa mappen igen senare.</string>
     <string name="encryption_new_folder_unavailable">Det går inte att skapa krypterade mappar. End-to-end-kryptering är inte konfigurerad på den här servern.</string>
@@ -410,7 +407,6 @@
     <string name="encryption_open_no_network">Det går inte att nå servern. Försök öppna mappen igen senare.</string>
     <string name="encryption_open_unavailable">Det går inte att öppna den här mappen. End-to-end-kryptering är inte konfigurerad på den här servern.</string>
     <string name="end_to_end_encryption_certificate_unavailable">Kunde inte hämta servercertifikatet</string>
-    <string name="end_to_end_encryption_certificate_verification_failed">Det gick inte att verifiera den offentliga nyckeln</string>
     <string name="end_to_end_encryption_confirm_button">Aktivera kryptering</string>
     <string name="end_to_end_encryption_decrypting">Dekrypterar…</string>
     <string name="end_to_end_encryption_dialog_close">Stäng</string>
@@ -610,6 +606,7 @@
     <string name="foreign_files_remote_text">Fjärr: %1$s</string>
     <string name="forward">Vidarebefordra</string>
     <string name="fourHours">4 timmar</string>
+    <string name="gallery_unsupported_file">Filtypen stöds inte</string>
     <string name="governance_file_retention_label">Fillagring</string>
     <string name="governance_legal_hold_label">Rättsligt bevarande</string>
     <string name="governance_no_label">Ingen</string>
@@ -983,6 +980,7 @@
     <string name="share_link_file_no_exist">Det går inte att dela. Kontrollera att filen finns.</string>
     <string name="share_link_forbidden_permissions">att dela denna fil</string>
     <string name="share_link_optional_password_title">Ange ett valfritt lösenord</string>
+    <string name="share_link_password_rejected">Lösenordet uppfyller inte lösenordskraven. Försök med ett längre eller mer komplext lösenord.</string>
     <string name="share_link_password_title">Ange ett lösenord</string>
     <string name="share_link_with_label">Dela länk (%1$s)</string>
     <string name="share_no_expiration_date_label">Välj utgångsdatum</string>
@@ -1172,6 +1170,7 @@
     <string name="upload_cannot_create_file">Kan inte skapa lokal fil</string>
     <string name="upload_chooser_title">Ladda upp från…</string>
     <string name="upload_content_from_other_apps">Ladda upp innehåll från andra appar</string>
+    <string name="upload_direct_camera_not_found">Ingen kamera hittades</string>
     <string name="upload_direct_camera_photo">Bild</string>
     <string name="upload_direct_camera_promt">Vill du ta ett foto eller spela in en video?</string>
     <string name="upload_direct_camera_upload">Ladda upp från kamera</string>
@@ -1205,6 +1204,7 @@
     <string name="upload_old_android">Kryptering kräver Android 5.0 eller senare</string>
     <string name="upload_query_move_foreign_files">Otillräckligt utrymme förhindrar kopiering av de valda filerna till %1$s-mappen. Vill du flytta dem dit i stället?</string>
     <string name="upload_quota_exceeded">Lagringskvot överskriden</string>
+    <string name="upload_quota_exceeded_notification_description">Din lagringskvot är full, så uppladdningarna stoppades. Frigör utrymme eller be din administratör om mer kvot och försök sedan igen med de misslyckade uppladdningarna från Uppladdningar.</string>
     <string name="upload_scan_doc_upload">Skanna dokument med kameran</string>
     <string name="upload_sync_conflict_check">Det kan finnas en konflikt från din senaste uppladdning. Tryck för att kontrollera.</string>
     <string name="upload_sync_conflict_check_error">Kunde inte kontrollera uppladdningskonflikter. Försök igen.</string>

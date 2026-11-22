@@ -70,12 +70,15 @@ import com.owncloud.android.operations.e2e.E2ECertificateRenewalResult;
 import com.owncloud.android.operations.e2e.E2ECertificateRenewalService;
 import com.owncloud.android.operations.e2e.E2ECertificateValidity;
 import com.owncloud.android.operations.e2e.E2EDeletionService;
-import com.owncloud.android.providers.DocumentsStorageProvider;
+import com.owncloud.android.providers.documentstorage.DocumentsStorageProvider;
 import com.owncloud.android.ui.ThemeableSwitchPreference;
+import com.owncloud.android.ui.activity.fileactivity.DevVersionChecker;
 import com.owncloud.android.ui.asynctasks.LoadingVersionNumberTask;
 import com.owncloud.android.ui.dialog.setupEncryption.SetupEncryptionDialogFragment;
 import com.owncloud.android.ui.helpers.FileOperationsHelper;
 import com.owncloud.android.ui.model.ExtendedSettingsActivityDialog;
+import com.owncloud.android.ui.navigation.NavigatorActivity;
+import com.owncloud.android.ui.navigation.NavigatorScreen;
 import com.owncloud.android.utils.ClipboardUtil;
 import com.owncloud.android.utils.DeviceCredentialUtils;
 import com.owncloud.android.utils.EncryptionUtils;
@@ -98,7 +101,7 @@ import androidx.core.content.ContextCompat;
 import androidx.core.content.res.ResourcesCompat;
 import kotlin.Unit;
 
-import static com.owncloud.android.ui.activity.DrawerActivity.REQ_ALL_FILES_ACCESS;
+import static com.owncloud.android.ui.activity.drawer.DrawerActivity.REQ_ALL_FILES_ACCESS;
 
 /**
  * An Activity that allows the user to change the application's settings.
@@ -239,7 +242,7 @@ public class SettingsActivity extends PreferenceActivity
             if (pDevLink != null) {
                 if (getResources().getBoolean(R.bool.dev_version_direct_download_enabled)) {
                     pDevLink.setOnPreferenceClickListener(preference -> {
-                        FileActivity.checkForNewDevVersion(this, getApplicationContext());
+                        DevVersionChecker.checkForNewDevVersion(this, getApplicationContext());
                         return true;
                     });
                 } else {
@@ -681,8 +684,7 @@ public class SettingsActivity extends PreferenceActivity
             preferenceCategoryMore.removePreference(autoUpload);
         } else {
             autoUpload.setOnPreferenceClickListener(preference -> {
-                Intent intent = new Intent(this, SyncedFoldersActivity.class);
-                startActivity(intent);
+                startActivity(NavigatorActivity.Companion.intent(this, NavigatorScreen.AutoUpload.INSTANCE));
                 return true;
             });
         }
@@ -896,8 +898,7 @@ public class SettingsActivity extends PreferenceActivity
             if (pSyncedFolder != null) {
                 if (getResources().getBoolean(R.bool.syncedFolder_light)) {
                     pSyncedFolder.setOnPreferenceClickListener(preference -> {
-                        Intent intent = new Intent(this, SyncedFoldersActivity.class);
-                        startActivity(intent);
+                        startActivity(NavigatorActivity.Companion.intent(this, NavigatorScreen.AutoUpload.INSTANCE));
                         return true;
                     });
                 } else {
@@ -1324,6 +1325,6 @@ public class SettingsActivity extends PreferenceActivity
 
     @Override
     public void returnVersion(Integer latestVersion) {
-        FileActivity.showDevSnackbar(this, latestVersion, true, false);
+        DevVersionChecker.showDevSnackbar(this, latestVersion, true, false);
     }
 }

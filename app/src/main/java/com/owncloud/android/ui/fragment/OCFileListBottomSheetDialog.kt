@@ -50,7 +50,6 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
-@Suppress("LongParameterList")
 class OCFileListBottomSheetDialog(
     private val fileActivity: FileActivity,
     private val actions: OCFileListBottomSheetActions,
@@ -125,7 +124,7 @@ class OCFileListBottomSheetDialog(
         filterActionsForOfflineOperations()
         checkCreateEncryptedFolderVisibility()
 
-        if (MainApp.isClientBranded() && isFlavourGPlay()) {
+        if (MainApp.isClientBranded && isFlavourGPlay()) {
             // this way we can have branded clients with that permission
             val hasPermission = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
                 PermissionUtil.manifestHasAllFilesPermission(context)

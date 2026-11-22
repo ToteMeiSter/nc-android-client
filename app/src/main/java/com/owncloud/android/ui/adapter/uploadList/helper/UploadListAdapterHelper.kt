@@ -17,9 +17,9 @@ import com.owncloud.android.datamodel.OCFile
 import com.owncloud.android.db.OCUpload
 import com.owncloud.android.lib.common.utils.Log_OC
 import com.owncloud.android.ui.activity.ConflictsResolveActivity
-import com.owncloud.android.ui.activity.DrawerActivity
+import com.owncloud.android.ui.activity.drawer.DrawerActivity
 import com.owncloud.android.ui.activity.FileDisplayActivity
-import com.owncloud.android.ui.preview.PreviewImageFragment
+import com.owncloud.android.ui.preview.media.PreviewMediaFragment
 import com.owncloud.android.utils.MimeType
 import com.owncloud.android.utils.MimeTypeUtil
 import java.io.File
@@ -56,7 +56,7 @@ class UploadListAdapterHelper(private val activity: DrawerActivity) {
     }
 
     fun onUploadedItemClick(upload: OCUpload) {
-        val file = activity.storageManager.getFileByEncryptedRemotePath(upload.remotePath)
+        val file = activity.getStorageManager().getFileByEncryptedRemotePath(upload.remotePath)
         if (file == null) {
             SnackbarUtil.show(activity, R.string.error_retrieving_file)
             Log_OC.i(TAG, "Could not find uploaded file on remote.")
@@ -64,7 +64,7 @@ class UploadListAdapterHelper(private val activity: DrawerActivity) {
         }
 
         val optionalUser = activity.user
-        if (PreviewImageFragment.canBePreviewed(file) && optionalUser.isPresent) {
+        if (PreviewMediaFragment.canBePreviewed(file) && optionalUser.isPresent) {
             // show image preview and stay in uploads tab
             val intent = FileDisplayActivity.openFileIntent(activity, optionalUser.get(), file)
             activity.startActivity(intent)

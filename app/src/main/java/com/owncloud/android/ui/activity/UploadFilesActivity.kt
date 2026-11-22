@@ -20,6 +20,7 @@ import android.app.Activity
 import android.content.Intent
 import android.os.Bundle
 import android.os.Environment
+import android.os.storage.StorageManager
 import android.view.Menu
 import android.view.MenuInflater
 import android.view.MenuItem
@@ -40,6 +41,7 @@ import com.owncloud.android.R
 import com.owncloud.android.databinding.UploadFilesLayoutBinding
 import com.owncloud.android.datamodel.SyncedFolderProvider
 import com.owncloud.android.lib.common.utils.Log_OC
+import com.owncloud.android.ui.activity.drawer.DrawerActivity
 import com.owncloud.android.ui.activity.uploadfiles.UploadBehaviourSelector
 import com.owncloud.android.ui.activity.uploadfiles.UploadFilesDialogs
 import com.owncloud.android.ui.activity.uploadfiles.UploadFilesDialogs.Companion.QUERY_TO_MOVE_DIALOG_TAG
@@ -50,6 +52,7 @@ import com.owncloud.android.ui.dialog.ConfirmationDialogFragment.ConfirmationDia
 import com.owncloud.android.ui.dialog.SortingOrderDialogFragment.OnSortingOrderListener
 import com.owncloud.android.ui.fragment.localfilelist.LocalFileListFragment
 import com.owncloud.android.ui.fragment.localfilelist.LocalFileListListener
+import com.owncloud.android.ui.navigation.model.ActionBarStyle
 import com.owncloud.android.utils.FileSortOrder
 import com.owncloud.android.utils.PermissionUtil.checkStoragePermission
 import java.io.File
@@ -92,6 +95,7 @@ class UploadFilesActivity :
     private var optionsMenu: Menu? = null
     private var searchView: SearchView? = null
     private var chosenFilePaths: Array<String>? = null
+    private val androidStorageManager by lazy { getSystemService(StorageManager::class.java) }
 
     private val isRoot: Boolean
         get() = currentDir?.absolutePath == ROOT_DIR
@@ -110,7 +114,11 @@ class UploadFilesActivity :
 
     private val onBackPressedCallback = object : OnBackPressedCallback(true) {
         override fun handleOnBackPressed() {
-            if (isSearchOpen) closeSearch() else navigateToParentDirectory()
+            when {
+                isSearchOpen -> closeSearch()
+                navigateToParentDirectory() -> Log_OC.i(TAG, "Moved to parent directory")
+                else -> finish()
+            }
         }
     }
 
@@ -125,7 +133,7 @@ class UploadFilesActivity :
 
             searchView = (menu.findItem(R.id.action_search).actionView as SearchView).also {
                 viewThemeUtils.androidx.themeToolbarSearchView(it)
-                it.setOnSearchClickListener { mToolbarSpinner.visibility = View.GONE }
+                it.setOnSearchClickListener { toolbarSpinner.visibility = View.GONE }
             }
 
             menu.findItem(R.id.action_choose_storage_path)?.let { item ->
@@ -183,7 +191,7 @@ class UploadFilesActivity :
         uploadBehaviour = UploadBehaviourSelector(this, binding, preferences).apply {
             setup(themeUtils.getDefaultDisplayNameForRootFolder(this@UploadFilesActivity))
         }
-        setupToolbar()
+        showActionBar(ActionBarStyle.Plain)
         setupActionBar()
         setupToolbarSpinner()
         uploadBehaviour.checkWritableFolder(currentDir)
@@ -243,13 +251,15 @@ class UploadFilesActivity :
     }
 
     private fun setupToolbarSpinner() {
-        mToolbarSpinner.visibility = View.VISIBLE
-        mToolbarSpinner.adapter = directories
-        mToolbarSpinner.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
+        toolbarSpinner.visibility = View.VISIBLE
+        toolbarSpinner.adapter = directories
+        toolbarSpinner.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
             override fun onItemSelected(parent: AdapterView<*>, view: View, position: Int, id: Long) {
-                repeat(position) { onBackPressedDispatcher.onBackPressed() }
+                // Dirs are ordered deepest first, so 0 is current, 1 is parent ... until "/" .
+                // So we must go up by "position" and then set selection to the folder we reached, that is the new 0.
+                repeat(position) { navigateToParentDirectory() }
                 if (position != 0) {
-                    mToolbarSpinner.setSelection(0)
+                    toolbarSpinner.setSelection(0)
                 }
             }
 
@@ -288,14 +298,19 @@ class UploadFilesActivity :
         setDrawerIndicatorEnabled(isDrawerIndicatorAvailable)
     }
 
-    private fun navigateToParentDirectory() {
+    /**
+     * Navigates to parent directory
+     *
+     * @return true if navigation is possible, false otherwise
+     */
+    private fun navigateToParentDirectory(): Boolean {
         if (directories.count <= SINGLE_DIR) {
             finish()
-            return
+            return false
         }
 
         val isParentUnreadable = currentDir?.parentFile?.canRead() == false
-        if (currentDir == null || isParentUnreadable) return
+        if (currentDir == null || isParentUnreadable) return false
 
         directories.remove(directories.getItem(0))
         fileListFragment.onNavigateUp()
@@ -309,6 +324,7 @@ class UploadFilesActivity :
         if (!isFolderPickerMode) {
             setSelectAllMenuItem(selectAllMenuItem, false)
         }
+        return true
     }
 
     override fun onSaveInstanceState(outState: Bundle) {
@@ -471,10 +487,25 @@ class UploadFilesActivity :
     }
 
     private fun ArrayAdapter<String>.addDirectoryHierarchy(directory: File?) {
+        val volume = directory?.let { androidStorageManager.getStorageVolume(it) }
+
+        // Fallback to full path
+        if (volume == null) {
+            generateSequence(directory) { it.parentFile }
+                .takeWhile { it.parentFile != null }
+                .forEach { add(it.name) }
+            add(File.separator)
+            return
+        }
+
+        // Show user-readable path
         generateSequence(directory) { it.parentFile }
-            .takeWhile { it.parentFile != null }
+            .takeWhile { dir ->
+                dir.parentFile?.let { androidStorageManager.getStorageVolume(it) } == volume
+            }
             .forEach { add(it.name) }
-        add(File.separator)
+
+        add(volume.getDescription(this@UploadFilesActivity))
     }
 
     companion object {

@@ -42,7 +42,7 @@ import com.owncloud.android.datamodel.UploadsStorageManager
 import com.owncloud.android.db.OCUpload
 import com.owncloud.android.db.UploadResult
 import com.owncloud.android.lib.common.utils.Log_OC
-import com.owncloud.android.ui.activity.DrawerActivity
+import com.owncloud.android.ui.activity.drawer.DrawerActivity
 import com.owncloud.android.ui.adapter.progressListener.UploadProgressListener
 import com.owncloud.android.ui.adapter.uploadList.helper.UploadListAdapterHelper
 import com.owncloud.android.ui.adapter.uploadList.helper.UploadListItemOnClick
@@ -58,12 +58,9 @@ import java.util.function.Consumer
 
 @Suppress(
     "LongMethod",
-    "TooManyFunctions",
     "LargeClass",
-    "LongParameterList",
     "NestedBlockDepth",
-    "MaxLineLength",
-    "ReturnCount"
+    "MaxLineLength"
 )
 class UploadListAdapter(
     private val activity: DrawerActivity,
@@ -79,6 +76,7 @@ class UploadListAdapter(
 ) : SectionedRecyclerViewAdapter<SectionedViewHolder>() {
 
     private val uploadListSections = UploadListSection.sections()
+    private var latestLoadId = 0
     private val showUser: Boolean = accountManager.getAccounts().size > 1
     private val uploadHelper = FileUploadHelper.instance()
     private var uploadProgressListener: UploadProgressListener? = null
@@ -562,6 +560,7 @@ class UploadListAdapter(
 
         val accountName = optionalUser.get().accountName
         val capabilities = optionalCapabilities.get()
+        val loadId = ++latestLoadId
 
         activity.lifecycleScope.launch(Dispatchers.IO) {
             val succeededUploads = uploadHelper.getUploadsByStatus(
@@ -581,6 +580,11 @@ class UploadListAdapter(
             }
 
             withContext(Dispatchers.Main) {
+                if (loadId != latestLoadId) {
+                    onCompleted.run()
+                    return@withContext
+                }
+
                 for (i in uploadListSections.indices) {
                     uploadListSections[i] = updatedSections[i]
                 }

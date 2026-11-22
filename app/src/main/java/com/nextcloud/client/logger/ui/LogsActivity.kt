@@ -9,17 +9,16 @@ package com.nextcloud.client.logger.ui
 import android.os.Bundle
 import android.view.Menu
 import android.view.MenuItem
-import android.widget.ProgressBar
 import androidx.appcompat.widget.SearchView
-import androidx.databinding.DataBindingUtil
-import androidx.lifecycle.Observer
+import androidx.core.view.isInvisible
+import androidx.core.view.isVisible
 import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.LinearLayoutManager
-import androidx.recyclerview.widget.RecyclerView
 import com.nextcloud.client.di.ViewModelFactory
 import com.owncloud.android.R
 import com.owncloud.android.databinding.LogsActivityBinding
 import com.owncloud.android.ui.activity.ToolbarActivity
+import com.owncloud.android.ui.navigation.model.ActionBarStyle
 import javax.inject.Inject
 
 class LogsActivity : ToolbarActivity() {
@@ -43,25 +42,26 @@ class LogsActivity : ToolbarActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         vm = ViewModelProvider(this, viewModelFactory).get(LogsViewModel::class.java)
-        binding = DataBindingUtil.setContentView<LogsActivityBinding>(this, R.layout.logs_activity).apply {
-            lifecycleOwner = this@LogsActivity
-            vm = this@LogsActivity.vm
-        }
+        binding = LogsActivityBinding.inflate(layoutInflater)
+        setContentView(binding.root)
 
-        findViewById<ProgressBar>(R.id.logs_loading_progress).apply {
-            viewThemeUtils.platform.themeHorizontalProgressBar(this)
-        }
+        viewThemeUtils.platform.themeHorizontalProgressBar(binding.logsLoadingProgress)
 
         logsAdapter = LogsAdapter(this)
-        findViewById<RecyclerView>(R.id.logsList).apply {
+        binding.logsList.apply {
             layoutManager = LinearLayoutManager(this@LogsActivity)
             adapter = logsAdapter
         }
 
-        vm.entries.observe(this, Observer { logsAdapter.entries = it })
+        vm.entries.observe(this) { logsAdapter.entries = it }
+        vm.isLoading.observe(this) { isLoading ->
+            binding.logsLoadingProgress.isVisible = isLoading == true
+            binding.logsContent.isInvisible = isLoading == true
+        }
+        vm.status.observe(this) { binding.logsStatus.text = it }
         vm.load()
 
-        setupToolbar()
+        showActionBar(ActionBarStyle.Plain)
         supportActionBar?.setDisplayHomeAsUpEnabled(true)
 
         supportActionBar?.let {

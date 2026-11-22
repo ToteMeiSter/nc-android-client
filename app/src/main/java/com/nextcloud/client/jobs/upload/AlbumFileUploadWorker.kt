@@ -54,7 +54,6 @@ import kotlin.random.Random
  * this worker is a replica of FileUploadWorker
  * this worker will take care of upload and then copying the uploaded files to selected Album
  */
-@Suppress("LongParameterList", "TooGenericExceptionCaught")
 class AlbumFileUploadWorker(
     val uploadsStorageManager: UploadsStorageManager,
     val connectivityService: ConnectivityService,
@@ -192,7 +191,7 @@ class AlbumFileUploadWorker(
             .setSilent(true)
             .build()
 
-    @Suppress("ReturnCount", "LongMethod", "DEPRECATION")
+    @Suppress("LongMethod", "DEPRECATION")
     private suspend fun uploadFiles(): Result = withContext(Dispatchers.IO) {
         val accountName = inputData.getString(ACCOUNT)
         if (accountName == null) {
@@ -273,8 +272,9 @@ class AlbumFileUploadWorker(
 
             if (result.code == ResultCode.QUOTA_EXCEEDED) {
                 Log_OC.w(TAG, "Quota exceeded, stopping uploads")
-                notificationManager.showQuotaExceedNotification(operation)
-                break
+                uploadsStorageManager.markInProgressUploadsAsQuotaExceeded(accountName)
+                fileUploadEventBroadcaster.sendUploadCompleted(operation, result, context)
+                return@withContext Result.failure()
             }
 
             sendUploadFinishEvent(totalUploadSize, currentUploadIndex, operation, result)
@@ -336,7 +336,7 @@ class AlbumFileUploadWorker(
         addDataTransferProgressListener(this@AlbumFileUploadWorker)
     }
 
-    @Suppress("TooGenericExceptionCaught", "DEPRECATION")
+    @Suppress("DEPRECATION")
     private suspend fun upload(
         upload: OCUpload,
         operation: UploadFileOperation,

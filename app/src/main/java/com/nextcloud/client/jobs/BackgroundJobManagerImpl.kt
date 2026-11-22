@@ -54,6 +54,7 @@ import java.util.Date
 import java.util.UUID
 import java.util.concurrent.TimeUnit
 import kotlin.reflect.KClass
+import kotlin.time.Duration.Companion.days
 
 /**
  * Note to maintainers
@@ -69,7 +70,6 @@ import kotlin.reflect.KClass
  * considered private implementation detail and should not be leaked through the interface, to minimize
  * potential migration cost in the future.
  */
-@Suppress("TooManyFunctions") // we expect this implementation to have rich API
 internal class BackgroundJobManagerImpl(
     private val workManager: WorkManager,
     private val clock: Clock,
@@ -120,14 +120,14 @@ internal class BackgroundJobManagerImpl(
         const val TAG_PREFIX_START_TIMESTAMP = "timestamp"
         val PREFIXES = setOf(TAG_PREFIX_NAME, TAG_PREFIX_USER, TAG_PREFIX_START_TIMESTAMP, TAG_PREFIX_CLASS)
         const val NOT_SET_VALUE = "not set"
-        const val PERIODIC_BACKUP_INTERVAL_MINUTES = 24 * 60L
+        val PERIODIC_BACKUP_INTERVAL_MINUTES = 1.days.inWholeMinutes
         const val DEFAULT_PERIODIC_JOB_INTERVAL_MINUTES = 15L
         const val OFFLINE_OPERATIONS_PERIODIC_JOB_INTERVAL_MINUTES = 5L
         const val DEFAULT_IMMEDIATE_JOB_DELAY_SEC = 3L
         const val DEFAULT_BACKOFF_CRITERIA_DELAY_SEC = 300L
         const val ALBUM_JOB_FILES_UPLOAD = "album_files_upload"
 
-        private const val KEEP_LOG_MILLIS = 1000 * 60 * 60 * 24 * 3L
+        private val KEEP_LOG_MILLIS = 3.days.inWholeMilliseconds
 
         fun formatNameTag(name: String, user: User? = null): String = if (user == null) {
             "$TAG_PREFIX_NAME:$name"
@@ -939,6 +939,8 @@ internal class BackgroundJobManagerImpl(
 
         val request = oneTimeRequestBuilder(FolderDownloadWorker::class, JOB_DOWNLOAD_FOLDER)
             .addTag(JOB_DOWNLOAD_FOLDER)
+            .addTag(FolderDownloadWorker.formatTag(folder.fileId))
+            .addTag(FolderDownloadWorker.formatParentTag(folder.parentId))
             .setInputData(data)
             .setConstraints(constraints)
             .setExpedited(OutOfQuotaPolicy.RUN_AS_NON_EXPEDITED_WORK_REQUEST)

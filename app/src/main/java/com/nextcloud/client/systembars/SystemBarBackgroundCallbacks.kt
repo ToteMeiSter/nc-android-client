@@ -18,7 +18,7 @@ import com.nmc.android.ui.LauncherActivity
 import com.owncloud.android.R
 import com.owncloud.android.authentication.AuthenticatorActivity
 import com.owncloud.android.ui.activity.ToolbarActivity
-import com.owncloud.android.ui.preview.PreviewImageActivity
+import com.owncloud.android.ui.preview.media.PreviewMediaActivity
 import com.owncloud.android.utils.theme.ViewThemeUtils
 import dynamiccolor.MaterialDynamicColors
 import javax.inject.Provider
@@ -33,13 +33,12 @@ class SystemBarBackgroundCallbacks(private val viewThemeUtilsProvider: Provider<
             AuthenticatorActivity::class,
             FirstRunActivity::class,
             AudioPlayerActivity::class,
-            PreviewImageActivity::class
+            PreviewMediaActivity::class
         )
 
         private fun isExcluded(activity: Activity): Boolean = excludedActivities.any { it.isInstance(activity) }
 
         @JvmStatic
-        @Suppress("ReturnCount")
         fun apply(activity: Activity, viewThemeUtils: ViewThemeUtils) {
             if (isExcluded(activity)) return
 
@@ -63,7 +62,7 @@ class SystemBarBackgroundCallbacks(private val viewThemeUtilsProvider: Provider<
 
         @ColorInt
         private fun statusBarColor(activity: Activity, @ColorInt actionBarColor: Int): Int {
-            if (activity is ToolbarActivity && activity.isHomeSearchToolbarVisible) {
+            if (activity is ToolbarActivity && activity.isSearchActionBarVisible) {
                 return ContextCompat.getColor(activity, R.color.bg_default)
             }
 

@@ -5,7 +5,7 @@
  * SPDX-License-Identifier: AGPL-3.0-or-later
  */
 
-@file:Suppress("TopLevelPropertyNaming", "MagicNumber")
+@file:Suppress("MagicNumber")
 
 package com.nextcloud.client.assistant.chat
 
@@ -66,7 +66,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.nextcloud.utils.TimeConstants
+import com.nextcloud.utils.AppConstants
 import com.nextcloud.utils.extensions.time
 import com.owncloud.android.R
 import com.owncloud.android.lib.resources.assistant.chat.model.ChatMessage
@@ -107,7 +107,12 @@ fun ChatContent(chatViewModel: ChatViewModel, modifier: Modifier = Modifier) {
                 modifier = modifier,
                 listState = listState,
                 bottomSlot = {
-                    ChatErrorBanner(errorState.errorType)
+                    Column {
+                        ChatErrorBanner(errorState.errorType)
+                        if (errorState.errorType == ChatErrorType.GenerateResponse) {
+                            RetryButton(onClick = { chatViewModel.retryResponseGeneration() })
+                        }
+                    }
                 }
             )
         }
@@ -304,7 +309,7 @@ private fun AnimatedAssistantIcon() {
         initialValue = 1f,
         targetValue = 1.1f,
         animationSpec = infiniteRepeatable(
-            animation = tween(TimeConstants.MILLIS_PER_SECOND, easing = LinearEasing),
+            animation = tween(AppConstants.MILLIS_PER_SECOND, easing = LinearEasing),
             repeatMode = RepeatMode.Reverse
         ),
         label = "scale_animation"

@@ -343,6 +343,7 @@
     <string name="download_download_invalid_local_file_name">Nesprávny názov pre lokálny súbor</string>
     <string name="download_latest_dev_version">Stiahnuť poslednú vývojársku verziu</string>
     <string name="download_limit">Limit sťahovania</string>
+    <string name="downloader_download_canceled">Sťahovanie bolo zrušené</string>
     <string name="downloader_download_failed_content">Nepodarilo sa stiahnuť %1$s</string>
     <string name="downloader_download_failed_credentials_error">Sťahovanie neúspešné, je potrebné sa znovu prihlásiť</string>
     <string name="downloader_download_failed_ticker">Stiahnutie zlyhalo</string>
@@ -351,7 +352,6 @@
     <string name="downloader_download_in_progress_ticker">Sťahujem…</string>
     <string name="downloader_download_succeeded_content">%1$s stiahnuté</string>
     <string name="downloader_download_succeeded_ticker">Stiahnuté</string>
-    <string name="downloader_file_download_cancelled">Sťahovanie niektorých súborov bolo zrušené užívateľom.</string>
     <string name="downloader_file_download_failed">Pri sťahovaní súborov sa vyskytla chyba</string>
     <string name="downloader_not_downloaded_yet">Ešte nie je stiahnuté</string>
     <string name="downloader_unexpected_error">Pri sťahovaní súborov sa vyskytla neočakávaná chyba</string>
@@ -397,11 +397,8 @@
     <string name="encryption_encrypt_unavailable">Tento priečinok sa nedá zašifrovať. Na tomto serveri nie je nastavené end-to-end šifrovanie.</string>
     <string name="encryption_key_checking_keys">Kontrolujú sa kľúče…</string>
     <string name="encryption_key_handle_folder_read_only_description">Šifrovacie kľúče tohto účtu boli odstránené alebo nahradené, takže obsah tohto priečinka už nie je možné dešifrovať.\n\nPriečinok je odteraz iba na čítanie. Ak chcete znova používať šifrované priečinky, zálohujte tento priečinok a v nastaveniach nastavte nový šifrovací kľúč.</string>
-    <string name="encryption_key_handle_key_keys_only_on_device_description">Šifrovací kľúč uložený v tomto zariadení už nie je platný. Kľúče boli odvolané na serveri.\n\nV nastaveniach odstráňte miestne šifrovanie, aby ste mohli vytvoriť nový šifrovaný priečinok.</string>
-    <string name="encryption_key_handle_key_keys_only_on_device_outdated_description">Šifrovací kľúč uložený v tomto zariadení už nie je platný. Kľúče boli odvolané na serveri.\n\nZálohujte predtým vytvorený šifrovaný priečinok.\n\nPotom v nastaveniach odstráňte miestne šifrovanie, aby ste mohli vytvoriť nový šifrovaný priečinok.</string>
     <string name="encryption_key_handle_key_removed_title">Zmenili sa šifrovacie kľúče.</string>
     <string name="encryption_key_handle_no_keys_description">Tento priečinok nemožno otvoriť, pretože jeho šifrovacie kľúče už neexistujú v tomto zariadení ani na serveri.</string>
-    <string name="encryption_key_handle_setup_new_key_before_encrypting_description">Šifrovacie kľúče tohto účtu boli odstránené alebo nahradené.\n\nPred zašifrovaním priečinka nastavte nový šifrovací kľúč v nastaveniach.</string>
     <string name="encryption_new_folder_check_failed">Nepodarilo sa skontrolovať vaše šifrovacie kľúče. Skúste priečinok vytvoriť znova.</string>
     <string name="encryption_new_folder_no_network">Server nie je dostupný. Skúste priečinok vytvoriť znova neskôr.</string>
     <string name="encryption_new_folder_unavailable">Nemožno vytvárať šifrované priečinky. Na tomto serveri nie je nastavené end-to-end šifrovanie.</string>
@@ -410,7 +407,6 @@
     <string name="encryption_open_no_network">Server nie je dostupný. Skúste priečinok otvoriť znova neskôr.</string>
     <string name="encryption_open_unavailable">Tento priečinok nemožno otvoriť. Na tomto serveri nie je nastavené end-to-end šifrovanie.</string>
     <string name="end_to_end_encryption_certificate_unavailable">Nepodarilo sa získať certifikát servera</string>
-    <string name="end_to_end_encryption_certificate_verification_failed">Nepodarilo sa overiť verejný kľúč</string>
     <string name="end_to_end_encryption_confirm_button">Nastavenie šifrovania</string>
     <string name="end_to_end_encryption_decrypting">Dešifrujem…</string>
     <string name="end_to_end_encryption_dialog_close">Zatvoriť</string>
@@ -610,6 +606,7 @@
     <string name="foreign_files_remote_text">Vzdialené: %1$s</string>
     <string name="forward">Preposlať</string>
     <string name="fourHours">4 hodiny</string>
+    <string name="gallery_unsupported_file">Nepodporovaný typ súboru</string>
     <string name="governance_file_retention_label">Uchovávanie súborov</string>
     <string name="governance_legal_hold_label">Právne uchovanie</string>
     <string name="governance_no_label">Žiadne</string>
@@ -982,6 +979,7 @@
     <string name="share_link_file_no_exist">Zdieľanie nie je možné. Skontrolujte, či súbor existuje.</string>
     <string name="share_link_forbidden_permissions">sprístupniť tento súbor</string>
     <string name="share_link_optional_password_title">Zadajte voliteľné heslo </string>
+    <string name="share_link_password_rejected">Heslo nespĺňa požiadavky na heslá. Skúste dlhšie alebo zložitejšie heslo.</string>
     <string name="share_link_password_title">Vložte heslo</string>
     <string name="share_link_with_label">Zdieľať odkaz (%1$s)</string>
     <string name="share_no_expiration_date_label">Nastaviť dátum expirácie</string>
@@ -1171,6 +1169,7 @@
     <string name="upload_cannot_create_file">Nieje možné vytvoriť lokálny súbor</string>
     <string name="upload_chooser_title">Nahrať z…</string>
     <string name="upload_content_from_other_apps">Nahrať obsah z iných aplikácií</string>
+    <string name="upload_direct_camera_not_found">Nenašiel sa žiadny fotoaparát</string>
     <string name="upload_direct_camera_photo">Fotka</string>
     <string name="upload_direct_camera_promt">Chcete urobiť fotografiu alebo video?</string>
     <string name="upload_direct_camera_upload">Nahrať z fotoaparátu</string>
@@ -1204,6 +1203,7 @@
     <string name="upload_old_android">Šifrovanie je možné iba pri &gt;= Android 5.0</string>
     <string name="upload_query_move_foreign_files">Pre skopírovanie vybratých súborov do adresára %1$s nie je dostatok voľného miesta. Chcete ich namiesto toho presunúť?</string>
     <string name="upload_quota_exceeded">Kapacita úložiska prekročená</string>
+    <string name="upload_quota_exceeded_notification_description">Kvóta vášho úložiska je vyčerpaná, preto sa nahrávanie zastavilo. Uvoľnite miesto alebo požiadajte správcu o zvýšenie kvóty a potom skúste neúspešné nahrávania zopakovať v časti Nahrávania.</string>
     <string name="upload_scan_doc_upload">Naskenujte dokument z fotoaparátu</string>
     <string name="upload_sync_conflict_check">Pri poslednom nahrávaní mohol vzniknúť konflikt. Klepnutím ho skontrolujete.</string>
     <string name="upload_sync_conflict_check_error">Nepodarilo sa skontrolovať konflikty pri nahrávaní. Skúste to znova.</string>

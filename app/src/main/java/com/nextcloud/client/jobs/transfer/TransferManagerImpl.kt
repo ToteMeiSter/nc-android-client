@@ -20,6 +20,8 @@ import com.nextcloud.client.jobs.upload.UploadTask
 import com.owncloud.android.datamodel.OCFile
 import com.owncloud.android.operations.UploadFileOperation
 import java.util.UUID
+import com.nextcloud.utils.AppConstants.PROGRESS_PERCENTAGE_MAX
+import com.nextcloud.utils.AppConstants.PROGRESS_PERCENTAGE_MIN
 
 /**
  * Per-user file transfer manager.
@@ -31,7 +33,6 @@ import java.util.UUID
  * @param downloadTaskFactory Download task factory
  * @param threads maximum number of concurrent transfer processes
  */
-@Suppress("LongParameterList") // transfer operations requires those resources
 class TransferManagerImpl(
     private val runner: AsyncRunner,
     private val downloadTaskFactory: DownloadTask.Factory,
@@ -40,8 +41,6 @@ class TransferManagerImpl(
 ) : TransferManager {
 
     companion object {
-        const val PROGRESS_PERCENTAGE_MAX = 100
-        const val PROGRESS_PERCENTAGE_MIN = 0
         const val TEST_DOWNLOAD_PROGRESS_UPDATE_PERIOD_MS = 200L
         const val TEST_UPLOAD_PROGRESS_UPDATE_PERIOD_MS = 200L
     }

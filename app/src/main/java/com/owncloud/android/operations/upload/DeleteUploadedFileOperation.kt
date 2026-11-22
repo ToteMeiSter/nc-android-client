@@ -19,6 +19,7 @@ import com.owncloud.android.utils.SyncedFolderUtils
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import java.io.File
+import com.nextcloud.utils.AppConstants.MILLIS_PER_SECOND
 
 class DeleteUploadedFileOperation(
     private val syncedFolder: SyncedFolder,
@@ -28,12 +29,10 @@ class DeleteUploadedFileOperation(
 
     companion object {
         const val TAG = "DeleteUploadedFileOperation"
-
-        const val MS_IN_SECOND = 1000
     }
     private val syncFolderHelper = SyncFolderHelper(context)
 
-    @Suppress("NestedBlockDepth", "ReturnCount")
+    @Suppress("NestedBlockDepth")
     suspend fun run(): RemoteOperationResult<Stats> {
         Log_OC.d(TAG, "Analyzing folder ${syncedFolder.remotePath} from user ${syncedFolder.account}")
 
@@ -93,7 +92,6 @@ class DeleteUploadedFileOperation(
         return result
     }
 
-    @Suppress("ReturnCount")
     private suspend fun fileCanBeDeleted(localFile: File, folder: OCFile): Boolean {
         val remotePath = syncFolderHelper.getAutoUploadRemotePath(syncedFolder, localFile)
         val ocFile =
@@ -131,7 +129,7 @@ class DeleteUploadedFileOperation(
 
         // Check the file has same mod date. Note that the remote mod date is rounded to the second.
         val remoteLastMod = ocFile.modificationTimestamp
-        if (remoteLastMod / MS_IN_SECOND != localLastMod / MS_IN_SECOND) {
+        if (remoteLastMod / MILLIS_PER_SECOND != localLastMod / MILLIS_PER_SECOND) {
             Log_OC.i(
                 TAG,
                 "Local and remote mod date differs for file ${localFile.name}: " +

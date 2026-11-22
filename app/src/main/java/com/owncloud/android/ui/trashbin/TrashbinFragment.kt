@@ -40,7 +40,7 @@ import com.nextcloud.client.network.ClientFactory
 import com.nextcloud.client.network.ConnectivityService
 import com.nextcloud.client.preferences.AppPreferences
 import com.nextcloud.client.systembars.SystemBarBackgroundCallbacks
-import com.nextcloud.client.utils.Throttler
+import com.nextcloud.client.utils.Throttle
 import com.nextcloud.ui.sort.SortOrderUi
 import com.nextcloud.ui.trashbinFileActions.TrashbinFileActionsBottomSheet
 import com.nextcloud.utils.SnackbarUtil
@@ -81,8 +81,7 @@ class TrashbinFragment :
     @Inject
     lateinit var clientFactory: ClientFactory
 
-    @Inject
-    lateinit var throttler: Throttler
+    private val actionsMenuThrottle = Throttle()
 
     @Inject
     lateinit var viewThemeUtils: ViewThemeUtils
@@ -150,7 +149,7 @@ class TrashbinFragment :
 
         trashbinListAdapter = TrashbinListAdapter(
             this,
-            navigatorActivity?.storageManager,
+            navigatorActivity?.getStorageManager(),
             preferences,
             syncedFolderProvider,
             requireContext(),
@@ -419,7 +418,7 @@ class TrashbinFragment :
     }
 
     private fun openActionsMenu(filesCount: Int, checkedFiles: Set<TrashbinFile>) {
-        throttler.run("overflowClick") {
+        actionsMenuThrottle.run {
             val navigatorActivity = getTypedActivity(NavigatorActivity::class.java)
             val supportFragmentManager = navigatorActivity?.supportFragmentManager ?: return@run
 
@@ -437,7 +436,6 @@ class TrashbinFragment :
         }
     }
 
-    @Suppress("ReturnCount")
     private fun onFileActionChosen(@IdRes itemId: Int, checkedFiles: Set<TrashbinFile>): Boolean {
         if (checkedFiles.isEmpty()) {
             return false

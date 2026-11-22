@@ -46,7 +46,7 @@ import java.util.Calendar
 import java.util.Locale
 import java.util.Observable
 
-@Suppress("TooManyFunctions", "TooGenericExceptionCaught", "MagicNumber", "ReturnCount")
+@Suppress("MagicNumber")
 class UploadsStorageManager(
     private val currentAccountProvider: CurrentAccountProvider,
     private val contentResolver: ContentResolver
@@ -195,6 +195,17 @@ class UploadsStorageManager(
             setChanged()
             notifyObservers()
         }
+    }
+
+    suspend fun markInProgressUploadsAsQuotaExceeded(accountName: String) {
+        val count = uploadDao.updateStatusAndResultByAccount(
+            accountName = accountName,
+            currentStatus = UploadStatus.UPLOAD_IN_PROGRESS.value,
+            newStatus = UploadStatus.UPLOAD_FAILED.value,
+            lastResult = UploadResult.QUOTA_EXCEEDED.value
+        )
+        Log_OC.d(TAG, "marked $count in progress uploads as quota exceeded")
+        notifyObserversNow()
     }
 
     fun removeUpload(upload: OCUpload?): Int = if (upload == null) 0 else removeUpload(upload.uploadId)
