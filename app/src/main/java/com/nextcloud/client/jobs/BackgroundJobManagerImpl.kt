@@ -518,7 +518,9 @@ internal class BackgroundJobManagerImpl(
     private fun WorkInfo.isIgnoringPowerSaving(): Boolean = tags.any { it.endsWith("_$TAG_SUFFIX_IGNORE_POWER_SAVING") }
 
     private fun diagUniqueWork(name: String): String = workManager.getWorkInfosForUniqueWork(name).get()
-        .joinToString { "${it.state}(attempt=${it.runAttemptCount},stop=${it.stopReason},next=${it.nextScheduleTimeMillis})" }
+        .joinToString {
+            "${it.state}(attempt=${it.runAttemptCount},stop=${it.stopReason},next=${it.nextScheduleTimeMillis})"
+        }
 
     override fun schedulePeriodicAutoUpload() {
         val request = periodicRequestBuilder(
